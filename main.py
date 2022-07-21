@@ -9,7 +9,7 @@ COURSE_ATTRIBUTES = ['name', 'number', 'faculties', 'type', 'credits', 'attempt'
 
 
 def make_variables():
-    course_data = pd.read_csv(COURSE_DATABASE)
+    course_data = pd.read_csv(COURSE_DATABASE).iloc[:5, :]
 
     courses_list = list()
     for index in course_data.index:
@@ -60,12 +60,12 @@ def make_domain(start_date, end_date):
             domain.append(number + 0.2)
             domain.append(number + 0.3)
         d1 = d1 + datetime.timedelta(days=1)
-    return domain, number_to_real_date_dict
+    return set(domain), number_to_real_date_dict
 
 
 if __name__ == '__main__':
     variables = make_variables()
-    domain, number_to_real_date_dict = make_domain('2024/01/15', '2024/01/28')
+    domain, number_to_real_date_dict = make_domain('2024/01/15', '2024/02/28')
     CSP_Exam = CSPExams(variables, domain)
     CSP_Exam.create_constraints()
     result = CSP_Exam.backtracking_search()
