@@ -139,3 +139,5 @@ class CSPExams(CSP):
                 X_i_neighbors = self.get_neighbors(X_i)
                 for neighbor in X_i_neighbors:
                     arcs_queue.put((neighbor, X_i))
+
+
