@@ -13,7 +13,7 @@ class CSP(ABC):
         self.constraints = dict()
         for variable in self.variables:
             self.constraints[variable] = []
-            self.domains[variable] = domains
+            self.domains[variable] = domains.copy()
         #     if variable not in self.domains:
         #         raise LookupError("Every variable should have a domain assigned to it.")
 
@@ -103,6 +103,8 @@ class CSP(ABC):
                     return result
         return None
 
+    def least_constraing_value(self):
+        pass
 
     def degree_heuristic(self, assignment={}):
         # assignment is complete if every variable is assigned (our base case)
