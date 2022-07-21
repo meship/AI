@@ -1,6 +1,7 @@
 from CSP import CSP
 import itertools
 from ExamConstraint import ExamConstraint
+import queue
 
 CS_EXAM_DIFFERENCE = 6
 EE_EXAM_DIFFERENCE = 6
@@ -44,7 +45,8 @@ class CSPExams(CSP):
         for pair in pairs_permutations:
             max_days = self.calculate_days_(pair)
             # print(f"Pair is:{pair} and difference is: {max_days}")
-            self.add_constraint(ExamConstraint(pair, 3, max_days))
+            if max_days:
+                self.add_constraint(ExamConstraint(pair, 3, max_days))
 
         # forth hard constrain - Moed B period starts after the last Moed A
         for pair in pairs_combinations:
@@ -58,28 +60,75 @@ class CSPExams(CSP):
                 self.add_constraint(ExamConstraint(pair, 5))
 
     def shrink_domain(self, cur_assignment, shrank_domain, assigned_variable):
+
         for var in self.variables:
-            shrank_domain[var] -= {cur_assignment}
+            new_domain = set()
+            new_domain = new_domain.union({cur_assignment})
+            int_cur_assignment = int(cur_assignment)
             if var != assigned_variable:
-                start_boundary = max(1, int(cur_assignment) - self.calculate_days_((var, assigned_variable)))
-                end_boundary = min(self.exam_period_time, int(cur_assignment) +
+                start_boundary = max(1, int_cur_assignment - self.calculate_days_((var, assigned_variable)))
+                end_boundary = min(self.exam_period_time, int_cur_assignment +
                                    self.calculate_days_((assigned_variable, var)))
                 for day in range(start_boundary, end_boundary + 1):
-                    shrank_domain[var] -= {day + 0.1, day + 0.2, day + 0.3}
+                    new_domain -= {day + 0.1, day + 0.2, day + 0.3}
 
-                if var.attempt == 2 and assigned_variable.attempt == 1:
-                    for day in range(1, cur_assignment + 1):
-                        shrank_domain[var] -= {day + 0.1, day + 0.2, day + 0.3}
-
-                if var.get_name()[:-1] == cur_assignment.get_name()[:-1]:
-                    if var.attempt == 2:
-                        for day in range(cur_assignment, cur_assignment + 15):
-                            shrank_domain[var] -= {day + 0.1, day + 0.2, day + 0.3}
-                    else:
-                        for day in range(cur_assignment - 14, cur_assignment + 1):
-                            shrank_domain[var] -= {day + 0.1, day + 0.2, day + 0.3}
+                # if var.get_attempt() == 2 and assigned_variable.get_attempt() == 1:
+                #     for day in range(1, int_cur_assignment + 1):
+                #         new_domain -= {day + 0.1, day + 0.2, day + 0.3}
+                #
+                # if var.get_name()[:-1] == assigned_variable.get_name()[:-1]:
+                #     if var.get_attempt() == 2:
+                #         for day in range(int_cur_assignment, int_cur_assignment + 15):
+                #             new_domain -= {day + 0.1, day + 0.2, day + 0.3}
+                #     else:
+                #         for day in range(int_cur_assignment - 14, int_cur_assignment + 1):
+                #             new_domain -= {day + 0.1, day + 0.2, day + 0.3}
+            new_set = shrank_domain[var] - new_domain
+            shrank_domain[var] = new_set
         return shrank_domain
 
+    def remove_inconsistent_values(self, X_i, X_j):
+        removed = False
+        union_constraints = self.constraints[X_i] + self.constraints[X_j]
+        common_constraints = list()
+        for constraint in union_constraints:
+            if X_i in constraint.variables and X_j in constraint.variables:
+                common_constraints.append(constraint)
+
+        for index in range(len(self.domains[X_i])):
+            x = self.domains[X_i][index]
+            for y in self.domains[X_j]:
+                is_satisfied = True
+                for constraint in common_constraints:
+                    is_satisfied = is_satisfied and constraint.satisfied({X_i: x, X_j: y})
+                if is_satisfied:
+                    break
+            else:
+                self.domains[X_i].remove(x)
+                removed = True
+        return removed
+
+
+
+    def get_neighbors(self, current_variable):
+        neighbors = set()
+        for constraint in self.constraints[current_variable]:
+            if constraint.kind != 2:
+                neighbors.add(set(constraint.variables))
+        return list(neighbors - {current_variable})
+
+
+    def arc3(self):
+        arcs_queue = queue.Queue()
+        for pair in itertools.combinations(self.variables, 2):
+            arcs_queue.put(pair)
+
+        while not arcs_queue.empty():
+            X_i, X_j = arcs_queue.get()
+            if self.remove_inconsistent_values(X_i, X_j):
+                X_i_neighbors = self.get_neighbors(X_i)
+                for neighbor in X_i_neighbors:
+                    arcs_queue.put((neighbor, X_i))
 
 
 

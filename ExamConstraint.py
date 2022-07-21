@@ -11,7 +11,7 @@ class ExamConstraint(Constraint):
         self.max_days = max_days
 
     def satisfied_1(self, assignment):
-        if self.variables[1] not in assignment:
+        if self.variables[0] not in assignment or self.variables[1] not in assignment:
             return True
         return assignment[self.variables[0]] != assignment[self.variables[1]]
 

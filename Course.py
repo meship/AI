@@ -35,11 +35,14 @@ class Course:
     def __repr__(self):
         return self.name_
 
-    def __eq__(self, o):
-        return self.name_ == o.get_name()
-
-    def __ne__(self, o):
-        return self.name_ != o.get_name()
+    # def __eq__(self, o):
+    #     return self.name_ == o.get_name()
+    #
+    # def __ne__(self, o):
+    #     return self.name_ != o.get_name()
+    #
+    # def __hash__(self) -> int:
+    #     return self.name_.__hash__()
 
 
 
