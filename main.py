@@ -9,7 +9,7 @@ COURSE_ATTRIBUTES = ['name', 'number', 'faculties', 'type', 'credits', 'attempt'
 
 
 def make_variables():
-    course_data = pd.read_csv(COURSE_DATABASE).iloc[:5, :]
+    course_data = pd.read_csv(COURSE_DATABASE).iloc[:7, :]
 
     courses_list = list()
     for index in course_data.index:

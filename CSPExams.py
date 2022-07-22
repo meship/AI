@@ -64,41 +64,48 @@ class CSPExams(CSP):
             if pair[0].get_name()[:-1] == pair[1].get_name()[:-1]:
                 self.add_constraint(ExamConstraint(pair, 5))
 
-    def shrink_domain(self, cur_assignment, shrank_domain, assigned_variable):
-        for var in self.variables:
+    def shrink_domain(self, cur_assignment, shrank_domain, assigned_variable, unassigned_variables):
+        for var in unassigned_variables:
             elements_to_remove = set()
             elements_to_remove = elements_to_remove.union({cur_assignment})
             int_cur_assignment = int(cur_assignment)
             if var != assigned_variable:
-                np_domain = np.array(list(shrank_domain[var]))
-                # start_boundary = max(1, int_cur_assignment - self.pairs_difference[(var, assigned_variable)])
-                # end_boundary = min(self.exam_period_time, int_cur_assignment +
-                #                    self.pairs_difference[(assigned_variable, var)])
-                # for day in range(start_boundary, end_boundary + 1):
-                #     elements_to_remove.update({day + 0.1, day + 0.2, day + 0.3})
+                # np_domain = np.array(list(shrank_domain[var]))
+                start_boundary = max(1, int_cur_assignment - self.pairs_difference[(var, assigned_variable)])
+                end_boundary = min(self.exam_period_time, int_cur_assignment +
+                                   self.pairs_difference[(assigned_variable, var)])
+                for day in range(start_boundary, end_boundary + 1):
+                    elements_to_remove.add(day + 0.1)
+                    elements_to_remove.add(day + 0.2)
+                    elements_to_remove.add(day + 0.3)
 
                 if var.get_attempt() == 2 and assigned_variable.get_attempt() == 1:
                     # for day in range(1, int_cur_assignment + 1):
                     #     elements_to_remove.add(day + 0.1)
                     #     elements_to_remove.add(day + 0.2)
                     #     elements_to_remove.add(day + 0.3)
-                    np_domain = np_domain[np_domain > cur_assignment + 0.3]
+                    # np_domain = np_domain[np_domain > cur_assignment + 0.3]
+                    for day in self.domains[var]:
+                        if day > int_cur_assignment:
+                            continue
+                        elements_to_remove.add(day)
 
                 if var.get_name()[:-1] == assigned_variable.get_name()[:-1]:
                     if var.get_attempt() == 2:
-                        # for day in range(int_cur_assignment, int_cur_assignment + 15):
-                        #     elements_to_remove.add(day + 0.1)
-                        #     elements_to_remove.add(day + 0.2)
-                        #     elements_to_remove.add(day + 0.3)
-                        np_domain = np_domain[np_domain > cur_assignment + 13.3]
+                        for day in range(int_cur_assignment, int_cur_assignment + 15):
+                            elements_to_remove.add(day + 0.1)
+                            elements_to_remove.add(day + 0.2)
+                            elements_to_remove.add(day + 0.3)
+                        # np_domain = np_domain[np_domain > cur_assignment + 13.3]
                     else:
-                        # for day in range(int_cur_assignment - 14, int_cur_assignment + 1):
-                        #     elements_to_remove.add(day + 0.1)
-                        #     elements_to_remove.add(day + 0.2)
-                        #     elements_to_remove.add(day + 0.3)
-                        np_domain = np_domain[(np_domain < cur_assignment - 13.3) & (np_domain > cur_assignment)]
-                # new_set = shrank_domain[var] - elements_to_remove
-                shrank_domain[var] = set(np_domain)
+                        for day in range(int_cur_assignment - 14, int_cur_assignment + 1):
+                            elements_to_remove.add(day + 0.1)
+                            elements_to_remove.add(day + 0.2)
+                            elements_to_remove.add(day + 0.3)
+                        # np_domain = np_domain[(np_domain < cur_assignment - 13.3) & (np_domain > cur_assignment)]
+                # shrank_domain[var] = set(np_domain)
+                new_set = shrank_domain[var] - elements_to_remove
+                shrank_domain[var] = new_set
         return shrank_domain
 
     def remove_inconsistent_values(self, X_i, X_j):
