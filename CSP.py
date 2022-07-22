@@ -1,8 +1,6 @@
 # Press the green button in the gutter to run the script.
 import numpy as np
-import copy
-import itertools
-import queue
+from Constants import *
 from abc import ABC, abstractmethod
 
 
@@ -51,11 +49,12 @@ class CSP(ABC):
                     return result
         return None
 
+
     def find_var_to_assign_by_domain(self, unassigned, shrank_domain):
         min_len = np.Inf
         min_var = None
         for var in unassigned:
-            if var.get_attempt() == 2:
+            if var.get_attempt() == MOED_B:
                 continue
             domain_len = len(shrank_domain[var])
             if domain_len < min_len:
@@ -103,13 +102,10 @@ class CSP(ABC):
 
         # get the every possible domain value of the first unassigned variable
         first = self.find_var_to_assign_by_domain(unassigned, shrank_domain)
-        # first = unassigned[0]
-        # copy_of_first_domain = shrank_domain[first].copy()
         for value in shrank_domain[first]:
             if not value:
                 continue
             local_assignment = assignment.copy()
-            # to_shrink_domain = copy.deepcopy(shrank_domain)
             to_shrink_domain = shrank_domain.copy()
             local_assignment[first] = value
             to_shrink_domain = self.shrink_domain(value, to_shrink_domain, first, unassigned)
@@ -168,7 +164,6 @@ class CSP(ABC):
                     return result
         return None
 
-
     def both_heuristics(self, assignment, shrank_domain):
         # assignment is complete if every variable is assigned (our base case)
         if len(assignment) == len(self.variables):
@@ -184,7 +179,6 @@ class CSP(ABC):
             if not value[0]:
                 continue
             local_assignment = assignment.copy()
-            # to_shrink_domain = copy.deepcopy(shrank_domain)
             to_shrink_domain = shrank_domain.copy()
             local_assignment[first] = value[0]
             to_shrink_domain = self.shrink_domain(value[0], to_shrink_domain, first, unassigned)

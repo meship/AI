@@ -2,18 +2,22 @@ from CSP import CSP
 import itertools
 from ExamConstraint import ExamConstraint
 import queue
-import numpy as np
-
-CS_EXAM_DIFFERENCE = 6
-EE_EXAM_DIFFERENCE = 6
-M_EXAM_DIFFERENCE = 6
-CB_EXAM_DIFFERENCE = 4
+from Constants import *
 
 
 class CSPExams(CSP):
+    def __init__(self, variables, domains, change_periods_date):
+        # CSP.__init__(self, variables, domains)
+        self.variables = variables  # variables to be constrained
+        self.domains = dict()  # domain of each variable
+        self.constraints = dict()
+        for variable in self.variables:
+            self.constraints[variable] = []
+            if variable.get_attempt() == MOED_A:
+                self.domains[variable] = domains[:change_periods_date + 1]
+            else:
+                self.domains[variable] = domains[change_periods_date + 1:]
 
-    def __init__(self, variables, domains):
-        CSP.__init__(self, variables, domains)
         self.days_difference = {'CS': CS_EXAM_DIFFERENCE,
                                 'EE': EE_EXAM_DIFFERENCE,
                                 'M': M_EXAM_DIFFERENCE,
@@ -36,11 +40,11 @@ class CSPExams(CSP):
         # first hard constrain - each time slot has at most one exam scheduled to it
         pairs_combinations = list(itertools.combinations(self.variables, 2))
         for pair in pairs_combinations:
-            self.add_constraint(ExamConstraint(pair, 1))
+            self.add_constraint(ExamConstraint(pair, EXAMS_ON_DIFFERENT_DAYS_CONSTRAINT))
 
         # second hard constrain - each exam must be scheduled
         for variable in self.variables:
-            self.add_constraint(ExamConstraint((variable,), 2))
+            self.add_constraint(ExamConstraint((variable,), EACH_EXAM_HAS_A_DATE_CONSTRAINT))
 
         # third hard constrain:
         #  --> between CS courses we demand at least 6 days
@@ -49,49 +53,38 @@ class CSPExams(CSP):
         #  --> between CB courses we demand at least 4 days
 
         for pair, max_days in self.pairs_difference.items():
-            # print(f"Pair is:{pair} and difference is: {max_days}")
             if max_days:
-                self.add_constraint(ExamConstraint(pair, 3, max_days))
+                self.add_constraint(ExamConstraint(pair, DAYS_DIFFERENCE_ON_COMMON_FACULTIES_CONSTRAINT, max_days))
 
-        # forth hard constrain - Moed B period starts after the last Moed A
-        for pair in pairs_combinations:
-            if (pair[0].get_attempt() == 1 and pair[1].get_attempt() == 2) or \
-                    (pair[0].get_attempt() == 2 and pair[1].get_attempt() == 1):
-                self.add_constraint(ExamConstraint(pair, 4))
-
-        # fifth hard constrain - At least 14 days between moed A and moed B of the same course
+        # forth hard constrain - At least 14 days between moed A and moed B of the same course
         for pair in pairs_combinations:
             if pair[0].get_name()[:-1] == pair[1].get_name()[:-1]:
-                self.add_constraint(ExamConstraint(pair, 5))
+                self.add_constraint(ExamConstraint(pair, MOED_A_AND_B_DIFFERENCE_CONSTRAINT))
 
     def shrink_domain(self, cur_assignment, shrank_domain, assigned_variable, unassigned_variables):
         for var in unassigned_variables:
             int_cur_assignment = int(cur_assignment)
             if var != assigned_variable:
-                start_boundary = self.exam_period_time + 0.3
-                end_boundary = 1
+                first_day = self.domains[var][1]
+                final_day = self.domains[var][-1]
+
+                start_boundary = final_day + EVENING_EXAM
+                end_boundary = first_day
 
                 if self.pairs_difference[(var, assigned_variable)]:
-                    start_boundary = max(1, int_cur_assignment - self.pairs_difference[(var, assigned_variable)])
+                    start_boundary = max(first_day, int_cur_assignment - self.pairs_difference[(var, assigned_variable)])
 
                 if self.pairs_difference[(assigned_variable, var)]:
-                    end_boundary = min(self.exam_period_time, int_cur_assignment +
+                    end_boundary = min(final_day, int_cur_assignment +
                                        self.pairs_difference[(assigned_variable, var)])
 
-                if var.get_attempt() == 2 and assigned_variable.get_attempt() == 1:
-                    start_boundary = 1
-
-                elif var.get_attempt() == 1 and assigned_variable.get_attempt() == 2:
-                    start_boundary = int(cur_assignment)
-                    end_boundary = self.exam_period_time
-
                 if var.get_name()[:-1] == assigned_variable.get_name()[:-1]:
-                    if var.get_attempt() == 2:
-                        start_boundary = 1
-                        end_boundary = cur_assignment + 13.3
+                    if var.get_attempt() == MOED_B:
+                        start_boundary = first_day
+                        end_boundary = cur_assignment + MIN_ATTEMPTS_DIFFERENCE - 1 + EVENING_EXAM
                     else:
-                        start_boundary = int(cur_assignment) - 14
-                        end_boundary = self.exam_period_time
+                        start_boundary = int(cur_assignment) - MIN_ATTEMPTS_DIFFERENCE
+                        end_boundary = final_day
 
                 updated_domain = self.domains[var][(self.domains[var] < start_boundary) | (self.domains[var] > end_boundary)]
 
@@ -121,7 +114,7 @@ class CSPExams(CSP):
     def get_neighbors(self, current_variable):
         neighbors = set()
         for constraint in self.constraints[current_variable]:
-            if constraint.kind != 2:
+            if constraint.kind not in {EACH_EXAM_HAS_A_DATE_CONSTRAINT}:
                 neighbors.update(set(constraint.variables))
         return list(neighbors - {current_variable})
 
