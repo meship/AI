@@ -6,7 +6,7 @@ import numpy as np
 
 CS_EXAM_DIFFERENCE = 6
 EE_EXAM_DIFFERENCE = 6
-M_EXAM_DIFFERENCE = 7
+M_EXAM_DIFFERENCE = 6
 CB_EXAM_DIFFERENCE = 4
 
 
@@ -66,46 +66,36 @@ class CSPExams(CSP):
 
     def shrink_domain(self, cur_assignment, shrank_domain, assigned_variable, unassigned_variables):
         for var in unassigned_variables:
-            elements_to_remove = set()
-            elements_to_remove = elements_to_remove.union({cur_assignment})
             int_cur_assignment = int(cur_assignment)
             if var != assigned_variable:
-                # np_domain = np.array(list(shrank_domain[var]))
-                start_boundary = max(1, int_cur_assignment - self.pairs_difference[(var, assigned_variable)])
-                end_boundary = min(self.exam_period_time, int_cur_assignment +
-                                   self.pairs_difference[(assigned_variable, var)])
-                for day in range(start_boundary, end_boundary + 1):
-                    elements_to_remove.add(day + 0.1)
-                    elements_to_remove.add(day + 0.2)
-                    elements_to_remove.add(day + 0.3)
+                start_boundary = self.exam_period_time + 0.3
+                end_boundary = 1
+
+                if self.pairs_difference[(var, assigned_variable)]:
+                    start_boundary = max(1, int_cur_assignment - self.pairs_difference[(var, assigned_variable)])
+
+                if self.pairs_difference[(assigned_variable, var)]:
+                    end_boundary = min(self.exam_period_time, int_cur_assignment +
+                                       self.pairs_difference[(assigned_variable, var)])
 
                 if var.get_attempt() == 2 and assigned_variable.get_attempt() == 1:
-                    # for day in range(1, int_cur_assignment + 1):
-                    #     elements_to_remove.add(day + 0.1)
-                    #     elements_to_remove.add(day + 0.2)
-                    #     elements_to_remove.add(day + 0.3)
-                    # np_domain = np_domain[np_domain > cur_assignment + 0.3]
-                    for day in self.domains[var]:
-                        if day > int_cur_assignment:
-                            continue
-                        elements_to_remove.add(day)
+                    start_boundary = 1
+
+                elif var.get_attempt() == 1 and assigned_variable.get_attempt() == 2:
+                    start_boundary = int(cur_assignment)
+                    end_boundary = self.exam_period_time
 
                 if var.get_name()[:-1] == assigned_variable.get_name()[:-1]:
                     if var.get_attempt() == 2:
-                        for day in range(int_cur_assignment, int_cur_assignment + 15):
-                            elements_to_remove.add(day + 0.1)
-                            elements_to_remove.add(day + 0.2)
-                            elements_to_remove.add(day + 0.3)
-                        # np_domain = np_domain[np_domain > cur_assignment + 13.3]
+                        start_boundary = 1
+                        end_boundary = cur_assignment + 13.3
                     else:
-                        for day in range(int_cur_assignment - 14, int_cur_assignment + 1):
-                            elements_to_remove.add(day + 0.1)
-                            elements_to_remove.add(day + 0.2)
-                            elements_to_remove.add(day + 0.3)
-                        # np_domain = np_domain[(np_domain < cur_assignment - 13.3) & (np_domain > cur_assignment)]
-                # shrank_domain[var] = set(np_domain)
-                new_set = shrank_domain[var] - elements_to_remove
-                shrank_domain[var] = new_set
+                        start_boundary = int(cur_assignment) - 14
+                        end_boundary = self.exam_period_time
+
+                updated_domain = self.domains[var][(self.domains[var] < start_boundary) | (self.domains[var] > end_boundary)]
+
+                shrank_domain[var] = updated_domain
         return shrank_domain
 
     def remove_inconsistent_values(self, X_i, X_j):
@@ -124,7 +114,7 @@ class CSPExams(CSP):
                 if is_satisfied:
                     break
             else:
-                self.domains[X_i].remove(x)
+                self.domains[X_i] = self.domains[X_i][self.domains[X_i] != x]
                 removed = True
         return removed
 
