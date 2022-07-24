@@ -7,9 +7,9 @@ MOED_A = 1
 MOED_B = 2
 
 # CSP Exams
-CS_EXAM_DIFFERENCE = 6
-EE_EXAM_DIFFERENCE = 6
-M_EXAM_DIFFERENCE = 6
+CS_EXAM_DIFFERENCE = 4
+EE_EXAM_DIFFERENCE = 4
+M_EXAM_DIFFERENCE = 5
 CB_EXAM_DIFFERENCE = 4
 
 
@@ -30,3 +30,15 @@ MOED_A_RATIO = 0.6
 
 COURSE_DATABASE = "Courses_Data.csv"
 COURSE_ATTRIBUTES = ['name', 'number', 'faculties', 'type', 'credits', 'attempt']
+
+
+#  WCSP_Constraint
+HARD = 0
+SOFT = 1
+MAXIMUM_COST = 10
+
+#  WCSP_Exam_Constraint
+MATH_EXAMS_ON_MORNING = 5
+
+# WCSP_EXAM
+MATH_EXAMS_ON_MORNING_COST = 1

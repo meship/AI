@@ -62,7 +62,7 @@ def make_domain(start_date, end_date):
 
 
 if __name__ == '__main__':
-    domain, number_to_real_date_dict = make_domain('2022/01/15', '2022/04/08')
+    domain, number_to_real_date_dict = make_domain('2022/01/15', '2022/03/08')
     change_periods_date = int(MOED_A_RATIO * len(domain))
     variables = make_variables(change_periods_date)
     # variables.sort(key=lambda x: x.get_attempt())
