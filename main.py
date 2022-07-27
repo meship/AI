@@ -45,7 +45,8 @@ def make_domain(start_date, end_date):
     delta = d2 - d1
 
     number_to_real_date_dict = dict()
-    domain = [0]
+    # domain = [0]
+    domain = list()
     for number in range(1, delta.days + 2):
         if d1.weekday() == SATURDAY:
             d1 = d1 + datetime.timedelta(days=1)

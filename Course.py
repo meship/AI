@@ -1,7 +1,7 @@
 from Constants import *
 
 class Course:
-    def __init__(self, name, number, faculties, type, credits, attempt, change_periods_date):
+    def __init__(self, name, number, faculties, type, credits, attempt, change_periods_date=None):
         self.name_ = name
         self.number_ = number
         self.faculties_ = faculties.split(", ")
