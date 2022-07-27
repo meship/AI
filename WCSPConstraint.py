@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from Constants import *
 
 
-class WCSP_Constraint(ABC):
+class WCSPConstraint(ABC):
     # The variables that the constraint is between
     def __init__(self, variables, cost, constraint_type=HARD):
         self.variables_ = variables
@@ -22,5 +22,5 @@ class WCSP_Constraint(ABC):
         ...
 
     @abstractmethod
-    def get_cost(self, value):
+    def get_cost(self, assignment):
         ...

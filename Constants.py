@@ -3,6 +3,8 @@
 ##################################################################
 
 # Course
+import numpy as np
+
 MOED_A = 1
 MOED_B = 2
 
@@ -35,10 +37,20 @@ COURSE_ATTRIBUTES = ['name', 'number', 'faculties', 'type', 'credits', 'attempt'
 #  WCSP_Constraint
 HARD = 0
 SOFT = 1
-MAXIMUM_COST = 10
+MAXIMUM_COST = np.inf
 
 #  WCSP_Exam_Constraint
 MATH_EXAMS_ON_MORNING = 5
 
+# WCSP
+BEST_ASSIGNMENT_FOUND = 1
+BEST_ASSIGNMENT_NOT_FOUND = 0
+
 # WCSP_EXAM
 MATH_EXAMS_ON_MORNING_COST = 1
+
+# simulated_annealing_state
+UNARY_PERIODS_MOVE = 0
+UNARY_DAYS_MOVE = 1
+BINARY_MOVE = 2
+N_TRIES = 250

@@ -2,12 +2,13 @@ import pandas as pd
 import numpy as np
 from Course import Course
 from CSPExams import CSPExams
+from WCSPExams import WCSPExams
 import datetime
 from Constants import *
 
 
 def make_variables(change_periods_date):
-    course_data = pd.read_csv(COURSE_DATABASE)
+    course_data = pd.read_csv(COURSE_DATABASE).iloc[:8, :]
 
     courses_list = list()
     for index in course_data.index:
@@ -66,15 +67,21 @@ if __name__ == '__main__':
     change_periods_date = int(MOED_A_RATIO * len(domain))
     variables = make_variables(change_periods_date)
     # variables.sort(key=lambda x: x.get_attempt())
-    CSP_Exam = CSPExams(variables, domain, change_periods_date)
-    CSP_Exam.create_constraints()
-    CSP_Exam.arc3()
-    print("finished arc3")
+    # CSP_Exam = CSPExams(variables, domain, change_periods_date)
+    # CSP_Exam.create_constraints()
+    # CSP_Exam.arc3()
+    # print("finished arc3")
     # result = CSP_Exam.backtracking_search()
     # result = CSP_Exam.degree_heuristic({})
     # result = CSP_Exam.minimum_remaining_vars({}, CSP_Exam.domains)
     # result = CSP_Exam.least_constraining_value({})
-    result = CSP_Exam.both_heuristics({}, CSP_Exam.domains)
-    for key, value in result.items():
+    # result = CSP_Exam.both_heuristics({}, CSP_Exam.domains)
+    wscp_exams = WCSPExams(variables=variables, domains=domain, change_periods_date=change_periods_date,
+                           k=MAXIMUM_COST)
+    wscp_exams.create_constraints()
+    wscp_exams.arc3()
+    print("finished arc3")
+    wscp_exams.branch_and_bound({}, 0, 0)
+    for key, value in wscp_exams.best_assignment_.items():
         print(f"{key}: {value}, {number_to_real_date_dict[value]}")
 

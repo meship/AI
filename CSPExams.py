@@ -37,12 +37,12 @@ class CSPExams(CSP):
         self.pairs_difference[pair] = 0
 
     def create_constraints(self):
-        # first hard constrain - each time slot has at most one exam scheduled to it
+        # first hard constraint - each time slot has at most one exam scheduled to it
         pairs_combinations = list(itertools.combinations(self.variables, 2))
         for pair in pairs_combinations:
             self.add_constraint(ExamConstraint(pair, EXAMS_ON_DIFFERENT_DAYS_CONSTRAINT))
 
-        # second hard constrain - each exam must be scheduled
+        # second hard constraint - each exam must be scheduled
         for variable in self.variables:
             self.add_constraint(ExamConstraint((variable,), EACH_EXAM_HAS_A_DATE_CONSTRAINT))
 
