@@ -46,6 +46,7 @@ class SimulatedAnnealingSolver:
             print(f"({pair[0]}, {pair[1]}): {diff}")
         print(f"Number of Friday exams: {self.state_.exam_on_friday_constraint()}")
         print(f"Number of Sunday morning exams: {self.state_.exam_on_sunday_morning_constraint()}")
+        print(f"Number of evening exams: {self.state_.exam_on_evening_constraint()}")
         print(f"Number of Math NOT morning exams: {self.state_.math_exam_on_morning_constraint()}")
 
 
@@ -81,7 +82,7 @@ def cooling_function(temp, alpha, t):
 
 
 if __name__ == '__main__':
-    data = pd.read_csv(COURSE_DATABASE2) # .iloc[:8, :]
+    data = pd.read_csv(COURSE_DATABASE2) # .iloc[:3, :]
     courses = get_courses(data)
     representative_times, number_to_real_date_dict = make_domain('2022/01/15', '2022/03/08')
     n_courses, n_times, courses_to_rows_dict, times_to_cols_dict, reverse_times_to_cols_dict = preprocess_courses(

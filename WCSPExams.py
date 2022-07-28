@@ -18,10 +18,10 @@ class WCSPExams(WCSP):
             else:
                 self.domains_[variable] = domains[change_periods_date + 1:]
 
-        self.days_difference_ = {'CS': CS_EXAM_DIFFERENCE,
-                                 'EE': EE_EXAM_DIFFERENCE,
-                                 'M': M_EXAM_DIFFERENCE,
-                                 'CB': CB_EXAM_DIFFERENCE}
+        self.days_difference_ = {'CS': CS_EXAM_DIFFERENCE_A,
+                                 'EE': EE_EXAM_DIFFERENCE_A,
+                                 'M': M_EXAM_DIFFERENCE_A,
+                                 'CB': CB_EXAM_DIFFERENCE_A}
 
         self.exam_period_time_ = int(max(domains))
         self.maximum_cost_ = k

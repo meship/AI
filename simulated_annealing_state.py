@@ -24,10 +24,19 @@ class SimulatedAnnealingState:
         else:
             # self.exam_time_mat = exam_time_mat
             self.assignment_dict = assignment_dict # mapping from courses indices to times indices
-        self.days_difference = {'CS': CS_EXAM_DIFFERENCE,
-                                'EE': EE_EXAM_DIFFERENCE,
-                                'M': M_EXAM_DIFFERENCE,
-                                'CB': CB_EXAM_DIFFERENCE}
+
+        self.days_difference = {'CS': (CS_EXAM_DIFFERENCE_A, CS_EXAM_DIFFERENCE_B),
+                                'EE': (EE_EXAM_DIFFERENCE_A, EE_EXAM_DIFFERENCE_B),
+                                'M': (M_EXAM_DIFFERENCE_A, M_EXAM_DIFFERENCE_B),
+                                'CB': (CB_EXAM_DIFFERENCE_A, CB_EXAM_DIFFERENCE_B),
+                                'ST': (ST_EXAM_DIFFERENCE_A, ST_EXAM_DIFFERENCE_B),
+                                'E': (E_EXAM_DIFFERENCE_A, E_EXAM_DIFFERENCE_B),
+                                'P': (P_EXAM_DIFFERENCE_A, P_EXAM_DIFFERENCE_B),
+                                'PS': (PS_EXAM_DIFFERENCE_A, PS_EXAM_DIFFERENCE_B),
+                                'CSM': (CSM_EXAM_DIFFERENCE_A, CSM_EXAM_DIFFERENCE_B),
+                                'CSE': (CSE_EXAM_DIFFERENCE_A, CSE_EXAM_DIFFERENCE_B),
+                                'CSP': (CSP_EXAM_DIFFERENCE_A, CSP_EXAM_DIFFERENCE_B),
+                                'PSB': (PSB_EXAM_DIFFERENCE_A, PSB_EXAM_DIFFERENCE_B)}
         pairs_permutations = list(itertools.permutations(self.courses_dict.keys(), 2))
         self.pairs_difference = dict()
         for pair in pairs_permutations:
@@ -62,7 +71,7 @@ class SimulatedAnnealingState:
     def calculate_days_(self, pair):
         for faculty in self.days_difference:
             if faculty in pair[0].get_faculties() and faculty in pair[1].get_faculties():
-                self.pairs_difference[pair] = max([self.days_difference[val] for val in pair[1].get_faculties()])
+                self.pairs_difference[pair] = max([self.days_difference[val][pair[1].get_attempt()] for val in pair[1].get_faculties()])
                 return
         self.pairs_difference[pair] = 0
 
@@ -181,7 +190,9 @@ class SimulatedAnnealingState:
     def get_value(self):
         # Check satisfaction of soft constraints and return the representative value
         state_val = self.exam_diff_constraint() + 2 * self.exam_on_friday_constraint() + \
-                    2 * self.exam_on_sunday_morning_constraint() + 5 * self.math_exam_on_morning_constraint()
+                    2 * self.exam_on_sunday_morning_constraint() + 4 * self.math_exam_on_morning_constraint() + \
+                    7 * self.exam_on_evening_constraint()
+        # state_val = self.exam_diff_constraint()
         print(state_val)
         return state_val
 
@@ -221,12 +232,20 @@ class SimulatedAnnealingState:
                 penalty += 1
         return penalty
 
+    def exam_on_evening_constraint(self):
+        penalty = 0
+        for course, col in self.assignment_dict.items():
+            repr_time = self.reverse_times_dict[col]
+            if round(repr_time - int(repr_time), 2) == EVENING_EXAM:
+                penalty += 1
+        return penalty
+
     def math_exam_on_morning_constraint(self):
         penalty = 0
         for course, course_ind in self.courses_dict.items():
             if 'M' in course.get_faculties():
                 repr_time = self.reverse_times_dict[self.assignment_dict[course_ind]]
-                if round(repr_time, 1) - int(repr_time) != MORNING_EXAM:
+                if round(round(repr_time, 1) - int(repr_time),1) != MORNING_EXAM:
                     penalty += 1
         return penalty
 
@@ -302,5 +321,3 @@ class BinaryMove:
 # check with a big database
 # change time difference for second attempts
 # export scheduling of courses to a table
-
-EE,

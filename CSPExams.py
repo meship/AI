@@ -18,10 +18,10 @@ class CSPExams(CSP):
             else:
                 self.domains[variable] = domains[change_periods_date + 1:]
 
-        self.days_difference = {'CS': CS_EXAM_DIFFERENCE,
-                                'EE': EE_EXAM_DIFFERENCE,
-                                'M': M_EXAM_DIFFERENCE,
-                                'CB': CB_EXAM_DIFFERENCE}
+        self.days_difference = {'CS': CS_EXAM_DIFFERENCE_A,
+                                'EE': EE_EXAM_DIFFERENCE_A,
+                                'M': M_EXAM_DIFFERENCE_A,
+                                'CB': CB_EXAM_DIFFERENCE_A}
 
         self.exam_period_time = int(max(domains))
         pairs_permutations = list(itertools.permutations(self.variables, 2))
