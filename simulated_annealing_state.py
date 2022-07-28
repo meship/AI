@@ -1,5 +1,6 @@
 import copy
 import itertools
+import math
 
 import numpy as np
 from Constants import *
@@ -23,31 +24,46 @@ class SimulatedAnnealingState:
         else:
             # self.exam_time_mat = exam_time_mat
             self.assignment_dict = assignment_dict # mapping from courses indices to times indices
+        self.days_difference = {'CS': CS_EXAM_DIFFERENCE,
+                                'EE': EE_EXAM_DIFFERENCE,
+                                'M': M_EXAM_DIFFERENCE,
+                                'CB': CB_EXAM_DIFFERENCE}
+        pairs_permutations = list(itertools.permutations(self.courses_dict.keys(), 2))
+        self.pairs_difference = dict()
+        for pair in pairs_permutations:
+            self.calculate_days_(pair)
 
     def initialize_state(self):
         moed_a_courses_indices = np.array(range(self.n_courses // 2))
-        times_indices = np.array(range(self.n_times))
+        moed_a_final_date = math.floor(self.n_times * MOED_A_RATIO)
+        moed_a_times_indices = np.array(range(moed_a_final_date))
+        moed_b_times_indices = np.array(range(moed_a_final_date + 1, self.n_times))
         n_courses_assigned = 0
         while n_courses_assigned < self.n_courses // 2:
             current_moed_a = np.random.choice(moed_a_courses_indices)
-            current_moed_a_time = np.random.choice(times_indices)
+            current_moed_a_time = np.random.choice(moed_a_times_indices)
             current_moed_b = current_moed_a + self.n_courses // 2
-            available_moed_b_times = times_indices[times_indices >= current_moed_a_time + ATTEMPTS_DIFF]
+            available_moed_b_times = moed_b_times_indices[moed_b_times_indices >= current_moed_a_time + ATTEMPTS_DIFF]
             if not len(available_moed_b_times):
                 return 0
             current_moed_b_time = np.random.choice(available_moed_b_times)
-            # self.exam_time_mat[current_moed_a][current_moed_a_time] = 1
-            # self.exam_time_mat[current_moed_b][current_moed_b_time] = 1
             self.assignment_dict[current_moed_a] = current_moed_a_time
             self.assignment_dict[current_moed_b] = current_moed_b_time
             moed_a_ind = np.argwhere(moed_a_courses_indices == current_moed_a)
             moed_a_courses_indices = np.delete(moed_a_courses_indices, moed_a_ind)
-            moed_a_time_ind = np.argwhere(times_indices == current_moed_a_time)
-            times_indices = np.delete(times_indices, moed_a_time_ind)
-            moed_b_time_ind = np.argwhere(times_indices == current_moed_b_time)
-            times_indices = np.delete(times_indices, moed_b_time_ind)
+            moed_a_time_ind = np.argwhere(moed_a_times_indices == current_moed_a_time)
+            moed_a_times_indices = np.delete(moed_a_times_indices, moed_a_time_ind)
+            moed_b_time_ind = np.argwhere(moed_b_times_indices == current_moed_b_time)
+            moed_b_times_indices = np.delete(moed_b_times_indices, moed_b_time_ind)
             n_courses_assigned += 1
         return 1
+
+    def calculate_days_(self, pair):
+        for faculty in self.days_difference:
+            if faculty in pair[0].get_faculties() and faculty in pair[1].get_faculties():
+                self.pairs_difference[pair] = max([self.days_difference[val] for val in pair[1].get_faculties()])
+                return
+        self.pairs_difference[pair] = 0
 
     def is_legal_moed_b_date(self, moed_a_col, moed_b_col):
         moed_a_rep_time = self.reverse_times_dict[moed_a_col]
@@ -55,6 +71,7 @@ class SimulatedAnnealingState:
         return int(moed_b_rep_time) - int(moed_a_rep_time) >= ATTEMPTS_DIFF # 12 instead of 14 due to 2 Saturdays between moed a and moed b
 
     def generate_successor(self):
+        # todo: add another move option which chooses a random value to be assigned
         successor_state = self.__copy__()
         # Generate all legal moves
         for course_ind in range(self.n_courses):
@@ -96,11 +113,6 @@ class SimulatedAnnealingState:
         # Check whether the hard constraint between 2 attempts remains satisfied
         elif not self.check_legal_transfer(move.old_row, move.new_col):
             return False
-        # Check whether the requested slot is not empty
-        # return self.exam_time_mat[move.new_row][move.new_col] == 0
-        for assignment in self.assignment_dict.values():
-            if assignment == move.new_col:
-                return False
         return True
 
     def check_binary_legal_move(self, move):
@@ -124,55 +136,89 @@ class SimulatedAnnealingState:
             moed_a_time = self.assignment_dict[moed_a_row]
             if not self.is_legal_moed_b_date(moed_a_time, exam_new_col):
                 return False
+        # Check whether the separation between first and second attempts is still kept
+        exam_separation_day = math.floor(self.n_times * MOED_A_RATIO)
+        if exam_row < (self.n_courses // 2):
+            if exam_new_col > exam_separation_day:
+                return False
+        else:
+            if exam_new_col <= exam_separation_day:
+                return False
+        # Check whether the requested slot is not empty
+        for assignment in self.assignment_dict.values():
+            if assignment == exam_new_col:
+                return False
+
         return True
 
     def apply_move(self, move):
         if move.type == UNARY_PERIODS_MOVE:
-            # self.exam_time_mat[move.old_row][move.old_col] = 0
-            # self.exam_time_mat[move.new_row][move.new_col] = 1
             self.assignment_dict[move.new_row] = move.new_col
         else:
-            # self.exam_time_mat[move.first_row][move.first_col] = 0
-            # self.exam_time_mat[move.first_row][move.second_col] = 1
             self.assignment_dict[move.first_row] = move.second_col
-            # self.exam_time_mat[move.second_row][move.second_col] = 0
-            # self.exam_time_mat[move.second_row][move.first_col] = 1
             self.assignment_dict[move.second_row] = move.first_col
 
     def get_value(self):
-        state_value = 0
+        # Check satisfaction of soft constraints and return the representative value
         # Check math exams are on mornings
-        for course, course_ind in self.courses_dict.items():
-            if 'M' in course.get_faculties():
-                repr_time = self.reverse_times_dict[self.assignment_dict[course_ind]]
-                if round(repr_time, 1) - int(repr_time) != MORNING_EXAM:
-                    state_value += 1
-        print(state_value)
+        # for course, course_ind in self.courses_dict.items():
+        #     if 'M' in course.get_faculties():
+        #         repr_time = self.reverse_times_dict[self.assignment_dict[course_ind]]
+        #         if round(repr_time, 1) - int(repr_time) != MORNING_EXAM:
+        #             state_value += 1
+        # Check difference between exams which belong to the same faculty
+        state_val = self.exam_diff_constraint()
+        print(state_val)
+        return state_val
+
+    def exam_diff_constraint(self):
+        state_value = 0
+        course_permutations = itertools.permutations(self.courses_dict.keys(), 2)
+        for course_pair in course_permutations:
+            actual_pair_diff = self.get_course_time_diff(course_pair)
+            state_value += max(0, self.pairs_difference[course_pair] - actual_pair_diff)
         return state_value
+
+    def periods_separation_constraint(self):
+        moed_a_times = list()
+        moed_b_times = list()
+        for course_ind, time_ind in self.assignment_dict.items():
+            if course_ind < self.n_courses // 2:
+                moed_a_times.append(time_ind)
+            else:
+                moed_b_times.append(time_ind)
+        return max(0, max(moed_a_times) - min(moed_b_times))
+
+    def check_constraint_satisfaction(self):
+        print("Results: ")
+        print(f"Duplicate status: {self.check_duplicates()}")
+        print(f"Difference status: ")
+        diff_results = self.check_exams_diff()
+        for pair, diff in diff_results.items():
+            print(f"({pair[0]}, {pair[1]}): {diff}")
 
     def check_duplicates(self):
         assigned_values = self.assignment_dict.values()
         return len(assigned_values) != len(np.unique(np.array(list(assigned_values))))
 
-    # def score(self, player):
-    #     return self.scores[player]
-    #
-    # def __eq__(self, other):
-    #     return np.array_equal(self.state, other.state) and np.array_equal(self.pieces, other.pieces)
-    #
-    # def __hash__(self):
-    #     return hash(str(self.state))
-    #
-    # def __str__(self):
-    #     out_str = []
-    #     for row in range(self.board_h):
-    #         for col in range(self.board_w):
-    #             if self.state[col, row] == -1:
-    #                 out_str.append('_')
-    #             else:
-    #                 out_str.append(str(self.state[col, row]))
-    #         out_str.append('\n')
-    #     return ''.join(out_str)
+    def check_exams_diff(self):
+        quality_dict = dict()
+        course_permutations = itertools.permutations(self.courses_dict.keys(), 2)
+        for course_pair in course_permutations:
+            actual_pair_diff = self.get_course_time_diff(course_pair)
+            diff = max(0, self.pairs_difference[course_pair] - actual_pair_diff)
+            if diff:
+                quality_dict[course_pair] = diff
+        return quality_dict
+
+    def get_course_time_diff(self, course_pair):
+        course1_ind = self.courses_dict[course_pair[0]]
+        course2_ind = self.courses_dict[course_pair[1]]
+        course1_time_ind = self.assignment_dict[course1_ind]
+        course2_time_ind = self.assignment_dict[course2_ind]
+        actual_pair_diff = abs(self.reverse_times_dict[course1_time_ind] -
+                               self.reverse_times_dict[course2_time_ind])
+        return actual_pair_diff
 
     def __copy__(self):
         c_n_courses = self.n_courses
@@ -181,7 +227,6 @@ class SimulatedAnnealingState:
         c_times_dict = self.times_dict
         c_n_reverse_times_dict = self.reverse_times_dict
         c_assignment_dict = self.assignment_dict.copy()
-        # c_exam_time_mat = copy.deepcopy(self.exam_time_mat)
         return SimulatedAnnealingState(c_n_courses, c_n_times, c_courses_dict, c_times_dict,
                                        c_n_reverse_times_dict, c_assignment_dict, False, None)
 

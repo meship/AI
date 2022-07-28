@@ -75,11 +75,17 @@ if __name__ == '__main__':
     representative_times, number_to_real_date_dict = make_domain('2022/01/15', '2022/03/08')
     n_courses, n_times, courses_to_rows_dict, times_to_cols_dict, reverse_times_to_cols_dict = preprocess_courses(
         courses, representative_times)
-    for i in range(100):
-        solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
-                                          reverse_times_to_cols_dict, None, 0.85, cooling_function)
-        solver.solve()
-        # print(solver.get_state())
-        print(solver.get_state().check_duplicates())
+    solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
+                                      reverse_times_to_cols_dict, None, 0.85, cooling_function)
+    solver.solve()
+    # returned_state = solver.get_state()
+    # reverse_state = list()
+    # for key, value in returned_state.assignment_dict.items():
+    #     reverse_state.append((value, key))
+    # reverse_state = sorted(reverse_state, key=lambda x: x[0])
+    # for elem in reverse_state:
+    #     print(f"{elem[0]} : {elem[1]}")
+    print(solver.get_state().check_constraint_satisfaction())
+    print(solver.get_state())
 
 
