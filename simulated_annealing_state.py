@@ -10,7 +10,7 @@ class SimulatedAnnealingState:
     # todo: courses in the requested matrix should be arranged by attempts
     def __init__(self, n_courses, n_times, courses_to_rows_dict,
                  times_to_cols_dict, reverse_times_to_cols_dict, assignment_dict,
-                 initialize_mat, exam_time_mat=None):
+                 initialize_mat, times_to_dates_dict):
         self.n_courses = n_courses
         self.n_times = n_times
         self.courses_dict = courses_to_rows_dict # mapping courses objects to their indices
@@ -32,6 +32,7 @@ class SimulatedAnnealingState:
         self.pairs_difference = dict()
         for pair in pairs_permutations:
             self.calculate_days_(pair)
+        self.times_to_days_dict = times_to_dates_dict
 
     def initialize_state(self):
         moed_a_courses_indices = np.array(range(self.n_courses // 2))
@@ -76,12 +77,14 @@ class SimulatedAnnealingState:
         # Generate all legal moves
         for course_ind in range(self.n_courses):
             time_ind = successor_state.assignment_dict[course_ind]
-            action_to_apply = np.random.choice([UNARY_PERIODS_MOVE, BINARY_MOVE])
+            action_to_apply = np.random.choice(a=[UNARY_PERIODS_MOVE, BINARY_MOVE, RANDOM_MOVE], size=1, replace=True,
+                                               p=np.array([0.45, 0.45, 0.1]))
             if action_to_apply == UNARY_PERIODS_MOVE:
                 successor_state.apply_unary_periods_move(course_ind, time_ind)
-            else:
+            elif action_to_apply == BINARY_MOVE:
                 successor_state.apply_binary_move(course_ind, time_ind)
-            # for course1, course_ind1 in self.courses_dict.items():
+            else:
+                successor_state.apply_random_move(course_ind, time_ind)
         return successor_state
 
     def apply_unary_periods_move(self, course_row, course_col):
@@ -102,6 +105,23 @@ class SimulatedAnnealingState:
                           friend_row, self.assignment_dict[friend_row], BINARY_MOVE)
         if self.check_binary_legal_move(move):
             self.apply_move(move)
+
+    def apply_random_move(self, course_row, course_col):
+        moed_a_final_date = math.floor(self.n_times * MOED_A_RATIO)
+        if course_row < self.n_courses // 2:
+            for try_ind in range(1, N_TRIES + 1):
+                new_col = np.random.choice(a=np.array(np.arange(moed_a_final_date + 1)))
+                move = UnaryMove(course_row, course_col, course_row, new_col, UNARY_PERIODS_MOVE)
+                if self.check_unary_periods_legal_move(move):
+                    self.apply_move(move)
+                    return
+        else:
+            for try_ind in range(1, N_TRIES + 1):
+                new_col = np.random.choice(a=np.array(np.arange(moed_a_final_date + 1, self.n_times)))
+                move = UnaryMove(course_row, course_col, course_row, new_col, UNARY_PERIODS_MOVE)
+                if self.check_unary_periods_legal_move(move):
+                    self.apply_move(move)
+                    return
 
     def check_unary_periods_legal_move(self, move):
         # Check whether we are in the proper bounds
@@ -160,14 +180,8 @@ class SimulatedAnnealingState:
 
     def get_value(self):
         # Check satisfaction of soft constraints and return the representative value
-        # Check math exams are on mornings
-        # for course, course_ind in self.courses_dict.items():
-        #     if 'M' in course.get_faculties():
-        #         repr_time = self.reverse_times_dict[self.assignment_dict[course_ind]]
-        #         if round(repr_time, 1) - int(repr_time) != MORNING_EXAM:
-        #             state_value += 1
-        # Check difference between exams which belong to the same faculty
-        state_val = self.exam_diff_constraint()
+        state_val = self.exam_diff_constraint() + 2 * self.exam_on_friday_constraint() + \
+                    2 * self.exam_on_sunday_morning_constraint() + 5 * self.math_exam_on_morning_constraint()
         print(state_val)
         return state_val
 
@@ -189,13 +203,32 @@ class SimulatedAnnealingState:
                 moed_b_times.append(time_ind)
         return max(0, max(moed_a_times) - min(moed_b_times))
 
-    def check_constraint_satisfaction(self):
-        print("Results: ")
-        print(f"Duplicate status: {self.check_duplicates()}")
-        print(f"Difference status: ")
-        diff_results = self.check_exams_diff()
-        for pair, diff in diff_results.items():
-            print(f"({pair[0]}, {pair[1]}): {diff}")
+    def exam_on_friday_constraint(self):
+        penalty = 0
+        for course, col in self.assignment_dict.items():
+            repr_time = self.reverse_times_dict[col]
+            day_of_week = self.times_to_days_dict[repr_time]
+            if day_of_week.weekday() == FRIDAY:
+                penalty += 1
+        return penalty
+
+    def exam_on_sunday_morning_constraint(self):
+        penalty = 0
+        for course, col in self.assignment_dict.items():
+            repr_time = self.reverse_times_dict[col]
+            day_of_week = self.times_to_days_dict[repr_time]
+            if day_of_week.weekday() == SUNDAY and round(repr_time - int(repr_time), 2) == MORNING_EXAM:
+                penalty += 1
+        return penalty
+
+    def math_exam_on_morning_constraint(self):
+        penalty = 0
+        for course, course_ind in self.courses_dict.items():
+            if 'M' in course.get_faculties():
+                repr_time = self.reverse_times_dict[self.assignment_dict[course_ind]]
+                if round(repr_time, 1) - int(repr_time) != MORNING_EXAM:
+                    penalty += 1
+        return penalty
 
     def check_duplicates(self):
         assigned_values = self.assignment_dict.values()
@@ -227,8 +260,9 @@ class SimulatedAnnealingState:
         c_times_dict = self.times_dict
         c_n_reverse_times_dict = self.reverse_times_dict
         c_assignment_dict = self.assignment_dict.copy()
+        c_n_times_to_days_dict = self.times_to_days_dict
         return SimulatedAnnealingState(c_n_courses, c_n_times, c_courses_dict, c_times_dict,
-                                       c_n_reverse_times_dict, c_assignment_dict, False, None)
+                                       c_n_reverse_times_dict, c_assignment_dict, False, c_n_times_to_days_dict)
 
     def __repr__(self):
         repr_val = "Exam Scheduling Is:\n"
@@ -262,3 +296,11 @@ class BinaryMove:
 
     def __str__(self):
         return f"({self.first_row, self.first_col} <-> {self.second_row, self.second_col})"
+
+
+# todo:
+# check with a big database
+# change time difference for second attempts
+# export scheduling of courses to a table
+
+EE,
