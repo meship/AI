@@ -80,7 +80,7 @@ BEST_ASSIGNMENT_NOT_FOUND = 0
 # WCSP_EXAM
 MATH_EXAMS_ON_MORNING_COST = 1
 
-# simulated_annealing_state
+# Simulated Annealing
 UNARY_PERIODS_MOVE = 0
 UNARY_MOVE_FORWARD = 1
 UNARY_MOVE_BACKWARD = -1
@@ -88,6 +88,9 @@ BINARY_MOVE = 1
 RANDOM_MOVE = 2
 ATTEMPTS_DIFF = 12
 N_TRIES = 250
+
+# Genetic Algorithms
+N_ATTEMPTS_TO_REPRODUCE = 100
 
 # Google Calendar
 TIMEZONE = "Israel"

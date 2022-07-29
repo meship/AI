@@ -10,13 +10,13 @@ class SimulatedAnnealingState:
     # todo: courses in the requested matrix should be arranged by attempts
     def __init__(self, n_courses, n_times, courses_to_rows_dict,
                  times_to_cols_dict, reverse_times_to_cols_dict, assignment_dict,
-                 initialize_mat, times_to_dates_dict):
+                 should_initialize, times_to_dates_dict):
         self.n_courses = n_courses
         self.n_times = n_times
         self.courses_dict = courses_to_rows_dict # mapping courses objects to their indices
         self.times_dict = times_to_cols_dict # mapping "representative times" to their indices
         self.reverse_times_dict = reverse_times_to_cols_dict # mapping indices to their "representative" times
-        if initialize_mat:
+        if should_initialize:
             # self.exam_time_mat = np.zeros(shape=(n_courses, n_times))
             self.assignment_dict = dict() # mapping from courses indices to times indices
             while self.initialize_state() == 0:
