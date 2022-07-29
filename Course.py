@@ -10,6 +10,7 @@ class Course:
         self.attempt_ = attempt
         self.exam_time_ = 0
         self.change_periods_date_ = change_periods_date
+        self.exam_id_ = None
 
     def get_name(self):
         return self.name_
@@ -35,8 +36,14 @@ class Course:
     def get_change_periods_date(self):
         return self.change_periods_date_
 
+    def get_exam_id(self):
+        return self.exam_id_
+
     def set_exam_time(self, time):
         self.exam_time_ = time
+
+    def set_exam_id(self, exam_id):
+        self.exam_id_ = exam_id
 
     def __repr__(self):
         return self.name_

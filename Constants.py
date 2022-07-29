@@ -88,3 +88,8 @@ BINARY_MOVE = 1
 RANDOM_MOVE = 2
 ATTEMPTS_DIFF = 12
 N_TRIES = 250
+
+# Google Calendar
+TIMEZONE = "Israel"
+DECISION_MESSAGE = "Do you want to save the calendar? Please insert y/n\n"
+DELETE_MESSAGE = "Deleting calendar"
