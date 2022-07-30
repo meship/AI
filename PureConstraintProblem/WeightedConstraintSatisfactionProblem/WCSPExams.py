@@ -1,13 +1,11 @@
-from WCSP import WCSP
+from PureConstraintProblem.WeightedConstraintSatisfactionProblem.WCSP import WCSP
 import itertools
-from WCSP_Exam_Constraint import WCSPExamConstraint
-import queue
-from Constants import *
+from PureConstraintProblem.WeightedConstraintSatisfactionProblem.WCSPExamConstraint import WCSPExamConstraint
+from Utils.Constants import *
 
 
 class WCSPExams(WCSP):
     def __init__(self, variables, domains, change_periods_date, k):
-        # CSP.__init__(self, variables, domains)
         self.variables_ = variables  # variables to be constrained
         self.domains_ = dict()  # domain of each variable
         self.constraints_ = dict()
@@ -34,6 +32,9 @@ class WCSPExams(WCSP):
         self.pairs_difference_ = dict()
         for pair in pairs_permutations:
             self.calculate_days_(pair)
+
+    def get_best_assignment(self):
+        return self.best_assignment_
 
     def calculate_days_(self, pair):
         for faculty in self.days_difference_:

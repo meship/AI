@@ -1,7 +1,7 @@
 import random
 
-from simulated_annealing_state import SimulatedAnnealingState
-from Constants import *
+from InformedSearchAlgorithms.ISAState import ISAState
+from Utils.Constants import *
 
 
 class SimulatedAnnealingSolver:
@@ -9,8 +9,8 @@ class SimulatedAnnealingSolver:
     def __init__(self, n_courses, n_times, courses_to_rows_dict,
                  times_to_cols_dict, reverse_times_to_cols_dict, assignment_dict, times_to_days_dict,
                  alpha, cooling_function, max_iter=5000):
-        self.state_ = SimulatedAnnealingState(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
-                                              reverse_times_to_cols_dict, assignment_dict, True, times_to_days_dict)
+        self.state_ = ISAState(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
+                               reverse_times_to_cols_dict, assignment_dict, True, times_to_days_dict)
         self.initial_temperature_ = 1
         self.alpha_ = alpha
         self.cooling_function_ = cooling_function

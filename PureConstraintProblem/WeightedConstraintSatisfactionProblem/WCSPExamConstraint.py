@@ -1,5 +1,5 @@
-from WCSPConstraint import WCSPConstraint
-from Constants import *
+from PureConstraintProblem.WeightedConstraintSatisfactionProblem.WCSPConstraint import WCSPConstraint
+from Utils.Constants import *
 
 
 class WCSPExamConstraint(WCSPConstraint):

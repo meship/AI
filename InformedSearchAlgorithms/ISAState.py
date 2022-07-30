@@ -1,12 +1,10 @@
-import copy
 import itertools
 import math
 
-import numpy as np
-from Constants import *
+from Utils.Constants import *
 
 
-class SimulatedAnnealingState:
+class ISAState:
     # todo: courses in the requested matrix should be arranged by attempts
     def __init__(self, n_courses, n_times, courses_to_rows_dict,
                  times_to_cols_dict, reverse_times_to_cols_dict, assignment_dict,
@@ -280,8 +278,8 @@ class SimulatedAnnealingState:
         c_n_reverse_times_dict = self.reverse_times_dict
         c_assignment_dict = self.assignment_dict.copy()
         c_n_times_to_days_dict = self.times_to_days_dict
-        return SimulatedAnnealingState(c_n_courses, c_n_times, c_courses_dict, c_times_dict,
-                                       c_n_reverse_times_dict, c_assignment_dict, False, c_n_times_to_days_dict)
+        return ISAState(c_n_courses, c_n_times, c_courses_dict, c_times_dict,
+                        c_n_reverse_times_dict, c_assignment_dict, False, c_n_times_to_days_dict)
 
     def __repr__(self):
         repr_val = "Exam Scheduling Is:\n"

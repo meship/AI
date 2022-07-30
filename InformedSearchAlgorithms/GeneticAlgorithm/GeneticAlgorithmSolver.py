@@ -1,8 +1,4 @@
-import random
-
-from simulated_annealing_state import SimulatedAnnealingState
-from Constants import *
-from GeneticAlgorithm.GeneticAlgorithmGeneration import *
+from InformedSearchAlgorithms.GeneticAlgorithm.GeneticAlgorithmGeneration import *
 
 class GeneticAlgorithmSolver:
 

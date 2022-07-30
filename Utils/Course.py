@@ -1,4 +1,4 @@
-from Constants import *
+
 
 class Course:
     def __init__(self, name, number, faculties, type, credits, attempt, change_periods_date=None):

@@ -1,28 +1,11 @@
-import uuid
-from datetime import datetime, timedelta
-from googleapiclient.discovery import build
-# from google_auth_oauthlib.flow import InstalledAppFlow
-import pickle
+from datetime import datetime
+from Utils.utils import export_to_calendar
 
 import pandas as pd
-from main import make_domain
-from simulated_annealing_solver import SimulatedAnnealingSolver
-from Course import *
-from Constants import *
+from InformedSearchAlgorithms.SimulatedAnnealing.SimulatedAnnealingSolver import SimulatedAnnealingSolver
 import sys
-from GeneticAlgorithm.GeneticAlgorithmSolver import *
-
-def get_courses(given_data):
-    courses = list()
-    for moed in [(MOED_A, 'A'), (MOED_B, 'B')]:
-        for index in given_data.index:
-            courses.append(Course(given_data[COURSE_ATTRIBUTES[0]][index] + f' - {moed[1]}',
-                                  given_data[COURSE_ATTRIBUTES[1]][index],
-                                  given_data[COURSE_ATTRIBUTES[2]][index],
-                                  given_data[COURSE_ATTRIBUTES[3]][index],
-                                  given_data[COURSE_ATTRIBUTES[4]][index],
-                                  moed[0]))
-    return courses
+from InformedSearchAlgorithms.GeneticAlgorithm.GeneticAlgorithmSolver import *
+from Utils.utils import get_courses, make_domain
 
 
 def preprocess_courses(courses_list, times_list):
@@ -54,48 +37,11 @@ def update_course_data(courses_dict, result_assignment_dict, reverse_time_dict, 
         course.set_exam_time(datetime(year, month, day, hours[repr_time][0], hours[repr_time][1], 0))
 
 
-def export_to_calendar(courses_list):
-    credentials = pickle.load(open("token.pkl", "rb"))
-    service = build("calendar", "v3", credentials=credentials)
-    result = service.calendarList().list().execute()
-    calendar_id = result["items"][0]['id']
-    for course in courses_list:
-        exam_event = create_event(course)
-        service.events().insert(calendarId=calendar_id, body=exam_event).execute()
-    save_decision = input(DECISION_MESSAGE)
-    if save_decision != 'y':
-        print(DELETE_MESSAGE)
-        for course in courses_list:
-            service.events().delete(calendarId=calendar_id, eventId=course.get_exam_id()).execute()
-    return
-
-
-def create_event(course):
-    start_time = course.get_exam_time()
-    end_time = start_time + timedelta(hours=3)
-    course.set_exam_id("".join(str(uuid.uuid4()).split("-")))
-    return {
-        'summary': course.get_name(),
-        'id': course.get_exam_id(),
-        'location': 'A100',
-        'colorId': str(course.get_number())[0],
-        'description': 'Exam',
-        'start': {
-            'dateTime': start_time.strftime("%Y-%m-%dT%H:%M:%S"),
-            'timeZone': TIMEZONE,
-        },
-        'end': {
-            'dateTime': end_time.strftime("%Y-%m-%dT%H:%M:%S"),
-            'timeZone': TIMEZONE,
-        },
-    }
-
-
 if __name__ == '__main__':
-    #todo: get args from command line
-    data = pd.read_csv(COURSE_DATABASE2) #.iloc[:3, :]
+    # argv[0] = kind, argv[1 + 2] = '2022/01/15', '2022/03/08'
+    data = pd.read_csv(ISA_COURSE_DATABASE2).iloc[:3, :]
     courses = get_courses(data)
-    representative_times, number_to_real_date_dict = make_domain('2022/01/15', '2022/03/08')
+    representative_times, number_to_real_date_dict = make_domain(sys.argv[2], sys.argv[3])
     n_courses, n_times, courses_to_rows_dict, times_to_cols_dict, reverse_times_to_cols_dict = preprocess_courses(
         courses, representative_times)
     hours_dict = {MORNING_EXAM: (9, 0), NOON_EXAM: (13, 30), EVENING_EXAM: (17, 0)}

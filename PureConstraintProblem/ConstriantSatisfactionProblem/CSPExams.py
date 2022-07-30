@@ -1,30 +1,30 @@
-from CSP import CSP
+from PureConstraintProblem.ConstriantSatisfactionProblem.CSP import CSP
 import itertools
-from ExamConstraint import ExamConstraint
+from PureConstraintProblem.ConstriantSatisfactionProblem.ExamConstraint import ExamConstraint
 import queue
-from Constants import *
+from Utils.Constants import *
 
 
 class CSPExams(CSP):
     def __init__(self, variables, domains, change_periods_date):
-        # CSP.__init__(self, variables, domains)
-        self.variables = variables  # variables to be constrained
-        self.domains = dict()  # domain of each variable
-        self.constraints = dict()
-        for variable in self.variables:
-            self.constraints[variable] = []
+        # PureConstraintProblem.__init__(self, variables, domains)
+        self.variables_ = variables  # variables to be constrained
+        self.domains_ = dict()  # domain of each variable
+        self.constraints_ = dict()
+        for variable in self.variables_:
+            self.constraints_[variable] = []
             if variable.get_attempt() == MOED_A:
-                self.domains[variable] = domains[:change_periods_date + 1]
+                self.domains_[variable] = domains[:change_periods_date + 1]
             else:
-                self.domains[variable] = domains[change_periods_date + 1:]
+                self.domains_[variable] = domains[change_periods_date + 1:]
 
-        self.days_difference = {'CS': CS_EXAM_DIFFERENCE_A,
-                                'EE': EE_EXAM_DIFFERENCE_A,
-                                'M': M_EXAM_DIFFERENCE_A,
-                                'CB': CB_EXAM_DIFFERENCE_A}
+        self.days_difference = {'CS': CS_EXAM_DIFFERENCE,
+                                'EE': EE_EXAM_DIFFERENCE,
+                                'M': M_EXAM_DIFFERENCE,
+                                'CB': CB_EXAM_DIFFERENCE}
 
         self.exam_period_time = int(max(domains))
-        pairs_permutations = list(itertools.permutations(self.variables, 2))
+        pairs_permutations = list(itertools.permutations(self.variables_, 2))
         self.pairs_difference = dict()
         for pair in pairs_permutations:
             self.calculate_days_(pair)
@@ -38,12 +38,12 @@ class CSPExams(CSP):
 
     def create_constraints(self):
         # first hard constraint - each time slot has at most one exam scheduled to it
-        pairs_combinations = list(itertools.combinations(self.variables, 2))
+        pairs_combinations = list(itertools.combinations(self.variables_, 2))
         for pair in pairs_combinations:
             self.add_constraint(ExamConstraint(pair, EXAMS_ON_DIFFERENT_DAYS_CONSTRAINT))
 
         # second hard constraint - each exam must be scheduled
-        for variable in self.variables:
+        for variable in self.variables_:
             self.add_constraint(ExamConstraint((variable,), EACH_EXAM_HAS_A_DATE_CONSTRAINT))
 
         # third hard constrain:
@@ -65,8 +65,8 @@ class CSPExams(CSP):
         for var in unassigned_variables:
             int_cur_assignment = int(cur_assignment)
             if var != assigned_variable:
-                first_day = self.domains[var][1]
-                final_day = self.domains[var][-1]
+                first_day = self.domains_[var][1]
+                final_day = self.domains_[var][-1]
 
                 start_boundary = final_day + EVENING_EXAM
                 end_boundary = first_day
@@ -86,48 +86,50 @@ class CSPExams(CSP):
                         start_boundary = int(cur_assignment) - MIN_ATTEMPTS_DIFFERENCE
                         end_boundary = final_day
 
-                updated_domain = self.domains[var][(self.domains[var] < start_boundary) | (self.domains[var] > end_boundary)]
+                updated_domain = self.domains_[var][(self.domains_[var] < start_boundary) | (self.domains_[var] > end_boundary)]
 
                 shrank_domain[var] = updated_domain
         return shrank_domain
 
-    def remove_inconsistent_values(self, X_i, X_j):
+    def remove_inconsistent_values_(self, X_i, X_j):
         removed = False
-        union_constraints = self.constraints[X_i] + self.constraints[X_j]
+        union_constraints = self.constraints_[X_i] + self.constraints_[X_j]
         common_constraints = list()
         for constraint in union_constraints:
-            if X_i in constraint.variables and X_j in constraint.variables:
+            if X_i in constraint.variables_ and X_j in constraint.variables_:
                 common_constraints.append(constraint)
 
-        for x in self.domains[X_i].copy():
-            for y in self.domains[X_j]:
+        for x in self.domains_[X_i].copy():
+            for y in self.domains_[X_j]:
                 is_satisfied = True
                 for constraint in common_constraints:
                     is_satisfied = is_satisfied and constraint.satisfied({X_i: x, X_j: y})
                 if is_satisfied:
                     break
             else:
-                self.domains[X_i] = self.domains[X_i][self.domains[X_i] != x]
+                self.domains_[X_i] = self.domains_[X_i][self.domains_[X_i] != x]
                 removed = True
         return removed
 
-    def get_neighbors(self, current_variable):
+    def get_neighbors_(self, current_variable):
         neighbors = set()
-        for constraint in self.constraints[current_variable]:
-            if constraint.kind not in {EACH_EXAM_HAS_A_DATE_CONSTRAINT}:
-                neighbors.update(set(constraint.variables))
+        for constraint in self.constraints_[current_variable]:
+            if constraint.kind_ not in {EACH_EXAM_HAS_A_DATE_CONSTRAINT}:
+                neighbors.update(set(constraint.variables_))
         return list(neighbors - {current_variable})
 
     def arc3(self):
         arcs_queue = queue.Queue()
-        for pair in itertools.combinations(self.variables, 2):
+        for pair in itertools.combinations(self.variables_, 2):
             arcs_queue.put(pair)
 
         while not arcs_queue.empty():
             X_i, X_j = arcs_queue.get()
-            if self.remove_inconsistent_values(X_i, X_j):
+            if self.remove_inconsistent_values_(X_i, X_j):
                 X_i_neighbors = self.get_neighbors(X_i)
                 for neighbor in X_i_neighbors:
                     arcs_queue.put((neighbor, X_i))
+
+
 
 

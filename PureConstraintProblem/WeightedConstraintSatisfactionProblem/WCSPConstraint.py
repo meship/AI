@@ -1,12 +1,11 @@
-# Base class for all constraints
-from abc import ABC, abstractmethod
-from Constants import *
+from abc import abstractmethod
+from Utils.Constants import *
+from PureConstraintProblem.Constraint import Constraint
 
 
-class WCSPConstraint(ABC):
-    # The variables that the constraint is between
+class WCSPConstraint(Constraint):
     def __init__(self, variables, cost, constraint_type=HARD):
-        self.variables_ = variables
+        super().__init__(variables)
         self.type_ = constraint_type
         self.cost_ = cost
         self.is_satisfied_ = None

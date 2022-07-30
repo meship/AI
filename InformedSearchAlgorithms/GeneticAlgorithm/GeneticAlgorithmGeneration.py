@@ -1,6 +1,5 @@
-import numpy as np
-from Constants import *
-from simulated_annealing_state import *
+from InformedSearchAlgorithms.ISAState import *
+
 
 class GeneticAlgorithmGeneration:
     def __init__(self, n_courses, n_times, courses_to_rows_dict,
@@ -22,13 +21,13 @@ class GeneticAlgorithmGeneration:
                                   times_to_dates_dict):
         population = list()
         for i in range(self.population_size_):
-            new_child = SimulatedAnnealingState(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
-                                              reverse_times_to_cols_dict, assignment_dict, True, times_to_dates_dict)
+            new_child = ISAState(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
+                                 reverse_times_to_cols_dict, assignment_dict, True, times_to_dates_dict)
             for child in population:
                 while child == new_child:
-                    new_child = SimulatedAnnealingState(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
-                                                      reverse_times_to_cols_dict, assignment_dict, True,
-                                                      times_to_dates_dict)
+                    new_child = ISAState(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
+                                         reverse_times_to_cols_dict, assignment_dict, True,
+                                         times_to_dates_dict)
             population.append(new_child)
         return population
 
@@ -71,21 +70,21 @@ class GeneticAlgorithmGeneration:
             valid_child_1 = self.check_valid_assignment(assignment1)
             valid_child_2 = self.check_valid_assignment(assignment2)
             if valid_child_1 and valid_child_2:
-                state_child1 = SimulatedAnnealingState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
-                                                     self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
-                                                     assignment1, False, self.times_to_dates_dict_)
-                state_child2 = SimulatedAnnealingState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
-                                                     self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
-                                                     assignment2, False, self.times_to_dates_dict_)
+                state_child1 = ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
+                                        self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
+                                        assignment1, False, self.times_to_dates_dict_)
+                state_child2 = ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
+                                        self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
+                                        assignment2, False, self.times_to_dates_dict_)
                 return state_child1 if -state_child1.get_value() > -state_child2.get_value() else state_child2
             elif valid_child_1:
-                return SimulatedAnnealingState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
-                                             self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
-                                             assignment1, False, self.times_to_dates_dict_)
+                return ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
+                                self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
+                                assignment1, False, self.times_to_dates_dict_)
             elif valid_child_2:
-                return SimulatedAnnealingState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
-                                             self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
-                                             assignment2, False, self.times_to_dates_dict_)
+                return ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
+                                self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
+                                assignment2, False, self.times_to_dates_dict_)
             else:
                 attempt += 1
 
