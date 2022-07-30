@@ -91,8 +91,21 @@ N_TRIES = 250
 
 # Genetic Algorithms
 N_ATTEMPTS_TO_REPRODUCE = 100
+CROSSOVER_PROB = 90
+MUTAION_PROB = 50
+PROB_DOMAIN= 100
+
+
 
 # Google Calendar
 TIMEZONE = "Israel"
 DECISION_MESSAGE = "Do you want to save the calendar? Please insert y/n\n"
 DELETE_MESSAGE = "Deleting calendar"
+
+
+# Run solvers
+SIMULATED_ANNEALING = "sa"
+GENETIC_ALGORITHM = "ga"
+SIMULATED_ANNEALING_MESSAGE = "Chosen algorithm is Simulated Annealing"
+GENETIC_ALGORITHM_MESSAGE = "Chosen algorithm is Genetic Algorithm"
+POPULATION_SIZE = 80 # was 68

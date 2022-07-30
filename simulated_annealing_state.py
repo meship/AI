@@ -189,10 +189,10 @@ class SimulatedAnnealingState:
 
     def get_value(self):
         # Check satisfaction of soft constraints and return the representative value
-        state_val = self.exam_diff_constraint() + 2 * self.exam_on_friday_constraint() + \
-                    2 * self.exam_on_sunday_morning_constraint() + 4 * self.math_exam_on_morning_constraint() + \
-                    7 * self.exam_on_evening_constraint()
-        # state_val = self.exam_diff_constraint()
+        # state_val = self.exam_diff_constraint() + 2 * self.exam_on_friday_constraint() + \
+        #             2 * self.exam_on_sunday_morning_constraint() + 4 * self.math_exam_on_morning_constraint() + \
+        #             7 * self.exam_on_evening_constraint()
+        state_val = self.exam_diff_constraint() + 0.75 * self.exam_on_evening_constraint()
         print(state_val)
         return state_val
 
@@ -258,7 +258,7 @@ class SimulatedAnnealingState:
         course_permutations = itertools.permutations(self.courses_dict.keys(), 2)
         for course_pair in course_permutations:
             actual_pair_diff = self.get_course_time_diff(course_pair)
-            diff = max(0, self.pairs_difference[course_pair] - actual_pair_diff)
+            diff = max(0, int(self.pairs_difference[course_pair] - actual_pair_diff))
             if diff:
                 quality_dict[course_pair] = diff
         return quality_dict
@@ -289,6 +289,14 @@ class SimulatedAnnealingState:
             repr_time = self.reverse_times_dict[self.assignment_dict[course_ind]]
             repr_val += f"{course}: {repr_time}\n"
         return repr_val
+
+    def __eq__(self, other):
+        eq_count = 0
+        for course_ind in self.assignment_dict.keys():
+            if self.assignment_dict[course_ind] == other.assignment_dict[course_ind]:
+                eq_count += 1
+        return eq_count == self.n_courses
+
 
 
 class UnaryMove:

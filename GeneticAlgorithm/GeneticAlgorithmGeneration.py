@@ -1,11 +1,11 @@
 import numpy as np
-from GeneticAlgorithmState import *
-
+from Constants import *
+from simulated_annealing_state import *
 
 class GeneticAlgorithmGeneration:
     def __init__(self, n_courses, n_times, courses_to_rows_dict,
                  times_to_cols_dict, reverse_times_to_cols_dict,
-                 times_to_dates_dict, population_size, generation_number=0):
+                 times_to_dates_dict, population_size):
         self.n_courses_ = n_courses
         self.n_times_ = n_times
         self.course_to_rows_dict_ = courses_to_rows_dict
@@ -13,7 +13,6 @@ class GeneticAlgorithmGeneration:
         self.reverse_times_to_cols_dict_ = reverse_times_to_cols_dict
         self.times_to_dates_dict_ = times_to_dates_dict
         self.population_size_ = population_size
-        self.generation_num_ = generation_number
         self.population_ = self.create_initial_population(n_courses, n_times, courses_to_rows_dict,
                                                           times_to_cols_dict, reverse_times_to_cols_dict,
                                                           {}, times_to_dates_dict)
@@ -23,11 +22,11 @@ class GeneticAlgorithmGeneration:
                                   times_to_dates_dict):
         population = list()
         for i in range(self.population_size_):
-            new_child = GeneticAlgorithmState(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
+            new_child = SimulatedAnnealingState(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
                                               reverse_times_to_cols_dict, assignment_dict, True, times_to_dates_dict)
             for child in population:
                 while child == new_child:
-                    new_child = GeneticAlgorithmState(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
+                    new_child = SimulatedAnnealingState(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
                                                       reverse_times_to_cols_dict, assignment_dict, True,
                                                       times_to_dates_dict)
             population.append(new_child)
@@ -36,15 +35,23 @@ class GeneticAlgorithmGeneration:
     def create_new_generation(self):
         new_population = list()
         probabilities = np.empty(self.population_size_)
+        print(f"Size is:{probabilities.shape}")
+        print(f"len is: {len(self.population_)}")
         for i, element in enumerate(self.population_):
-            probabilities[i] = element.calculate_fitness()
-        probabilities = probabilities / sum(probabilities)
+            probabilities[i] = -element.get_value() # [-10, -4 , -2] -> [0, 6, 8]
+        probabilities -= probabilities.min()
+        probabilities = probabilities / sum(probabilities) #todo: rethink
         children_amount = 0
         while children_amount < self.population_size_:
             parents = np.random.choice(a=self.population_, size=2, replace=True, p=probabilities)
-            child = self.reproduce(parents[0], parents[1], N_ATTEMPTS_TO_REPRODUCE)
-            if child is not None:
-                new_population.append(child)
+            if np.random.choice(PROB_DOMAIN) <= CROSSOVER_PROB:
+                child = self.reproduce(parents[0], parents[1], N_ATTEMPTS_TO_REPRODUCE)
+                if child is not None:
+                    new_population.append(self.mutate(child))
+                    children_amount += 1
+            else:
+                new_population.append(parents[0])
+                # new_population.append(parents[1])
                 children_amount += 1
         self.population_ = new_population
 
@@ -64,19 +71,19 @@ class GeneticAlgorithmGeneration:
             valid_child_1 = self.check_valid_assignment(assignment1)
             valid_child_2 = self.check_valid_assignment(assignment2)
             if valid_child_1 and valid_child_2:
-                state_child1 = GeneticAlgorithmState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
+                state_child1 = SimulatedAnnealingState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
                                                      self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
                                                      assignment1, False, self.times_to_dates_dict_)
-                state_child2 = GeneticAlgorithmState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
+                state_child2 = SimulatedAnnealingState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
                                                      self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
                                                      assignment2, False, self.times_to_dates_dict_)
-                return state_child1 if state_child1.get_fitness() > state_child2.get_fitness() else state_child2
+                return state_child1 if -state_child1.get_value() > -state_child2.get_value() else state_child2
             elif valid_child_1:
-                return GeneticAlgorithmState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
+                return SimulatedAnnealingState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
                                              self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
                                              assignment1, False, self.times_to_dates_dict_)
             elif valid_child_2:
-                return GeneticAlgorithmState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
+                return SimulatedAnnealingState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
                                              self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
                                              assignment2, False, self.times_to_dates_dict_)
             else:
@@ -87,11 +94,26 @@ class GeneticAlgorithmGeneration:
         assignment_vals = assignment_to_check.values()
         if len(assignment_vals) != len(np.unique(np.array(list(assignment_vals)))):
             return False
-        # Check whether all first attempts are prior to all the second attempts
+        # Check whether all the difference between two attempts remains
         for course_ind in range(self.n_courses_ // 2):
             if assignment_to_check[course_ind + self.n_courses_ // 2] - assignment_to_check[course_ind] < ATTEMPTS_DIFF:
                 return False
         return True
+
+    def mutate(self, child):
+        if np.random.choice(PROB_DOMAIN) <= MUTAION_PROB:
+            # randomly choosing how many courses will be mutated
+            number_of_genes = np.random.choice(range(self.n_courses_//4, self.n_courses_//2))
+            chosen_courses_ind = np.random.choice(range(self.n_courses_), size=number_of_genes, replace=False)
+            for course_ind in chosen_courses_ind:
+                # make the mutate
+                move = np.random.choice([BINARY_MOVE, UNARY_PERIODS_MOVE])
+                if move == UNARY_PERIODS_MOVE:
+                    child.apply_unary_periods_move(course_ind, child.assignment_dict[course_ind])
+                else:
+                    child.apply_binary_move(course_ind, child.assignment_dict[course_ind])
+        return child
+
 
 
 

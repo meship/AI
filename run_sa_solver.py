@@ -9,7 +9,8 @@ from main import make_domain
 from simulated_annealing_solver import SimulatedAnnealingSolver
 from Course import *
 from Constants import *
-
+import sys
+from GeneticAlgorithm.GeneticAlgorithmSolver import *
 
 def get_courses(given_data):
     courses = list()
@@ -91,20 +92,35 @@ def create_event(course):
 
 
 if __name__ == '__main__':
-    data = pd.read_csv(COURSE_DATABASE2).iloc[:3, :]
+    #todo: get args from command line
+    data = pd.read_csv(COURSE_DATABASE2) #.iloc[:3, :]
     courses = get_courses(data)
     representative_times, number_to_real_date_dict = make_domain('2022/01/15', '2022/03/08')
     n_courses, n_times, courses_to_rows_dict, times_to_cols_dict, reverse_times_to_cols_dict = preprocess_courses(
         courses, representative_times)
     hours_dict = {MORNING_EXAM: (9, 0), NOON_EXAM: (13, 30), EVENING_EXAM: (17, 0)}
-    solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
-                                      reverse_times_to_cols_dict, None, number_to_real_date_dict,
-                                      0.85, cooling_function)
-    solver.solve()
-    print(solver.get_state())
-    update_course_data(courses_to_rows_dict, solver.get_state().assignment_dict, reverse_times_to_cols_dict,
-                       number_to_real_date_dict, hours_dict)
-    solver.check_solution_quality()
+    if sys.argv[1] == SIMULATED_ANNEALING:
+        print(SIMULATED_ANNEALING_MESSAGE)
+        solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
+                                          reverse_times_to_cols_dict, None, number_to_real_date_dict,
+                                          0.85, cooling_function)
+        solver.solve()
+        print(solver.get_state())
+        update_course_data(courses_to_rows_dict, solver.get_state().assignment_dict, reverse_times_to_cols_dict,
+                           number_to_real_date_dict, hours_dict)
+        solver.check_solution_quality()
+    else:
+        print(GENETIC_ALGORITHM_MESSAGE)
+        solver = GeneticAlgorithmSolver(n_courses, n_times, courses_to_rows_dict,
+                                        times_to_cols_dict, reverse_times_to_cols_dict, number_to_real_date_dict,
+                                        POPULATION_SIZE)
+        solver.solve()
+        print(solver.get_best_child())
+        update_course_data(courses_to_rows_dict, solver.get_best_child().assignment_dict, reverse_times_to_cols_dict,
+                           number_to_real_date_dict, hours_dict)
+        solver.check_solution_quality()
+
+
     # scopes = ["https://www.googleapis.com/auth/calendar"]
     # flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=scopes)
     # credentials = flow.run_console()
