@@ -38,7 +38,7 @@ if __name__ == '__main__':
     domain, number_to_real_date_dict = make_domain(sys.argv[-2], sys.argv[-1])
     change_periods_date = int(MOED_A_RATIO * len(domain))
     variables = make_variables(change_periods_date)
-    if sys.argv[1] == CSP:
+    if sys.argv[1] == CHOICE_CSP:
         solve_CSP()
     else:
         solve_WCSP()
