@@ -30,11 +30,12 @@ class ISAState:
                                 'ST': (ST_EXAM_DIFFERENCE_A, ST_EXAM_DIFFERENCE_B),
                                 'E': (E_EXAM_DIFFERENCE_A, E_EXAM_DIFFERENCE_B),
                                 'P': (P_EXAM_DIFFERENCE_A, P_EXAM_DIFFERENCE_B),
-                                'PS': (PS_EXAM_DIFFERENCE_A, PS_EXAM_DIFFERENCE_B),
+                                'PC': (PC_EXAM_DIFFERENCE_A, PC_EXAM_DIFFERENCE_B),
                                 'CSM': (CSM_EXAM_DIFFERENCE_A, CSM_EXAM_DIFFERENCE_B),
                                 'CSE': (CSE_EXAM_DIFFERENCE_A, CSE_EXAM_DIFFERENCE_B),
                                 'CSP': (CSP_EXAM_DIFFERENCE_A, CSP_EXAM_DIFFERENCE_B),
-                                'PSB': (PSB_EXAM_DIFFERENCE_A, PSB_EXAM_DIFFERENCE_B)}
+                                'PSB': (PSB_EXAM_DIFFERENCE_A, PSB_EXAM_DIFFERENCE_B),
+                                'CSC': (CSC_EXAM_DIFFERENCE_A, CSC_EXAM_DIFFERENCE_B)}
         pairs_permutations = list(itertools.permutations(self.courses_dict.keys(), 2))
         self.pairs_difference = dict()
         for pair in pairs_permutations:
@@ -199,7 +200,10 @@ class ISAState:
         course_permutations = itertools.permutations(self.courses_dict.keys(), 2)
         for course_pair in course_permutations:
             actual_pair_diff = self.get_course_time_diff(course_pair)
-            state_value += max(0, self.pairs_difference[course_pair] - actual_pair_diff)
+            diff_from_optimal = max(0, self.pairs_difference[course_pair] - actual_pair_diff)
+            if diff_from_optimal >= 4:
+                diff_from_optimal = diff_from_optimal * 2
+            state_value += diff_from_optimal
         return state_value
 
     def periods_separation_constraint(self):

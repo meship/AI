@@ -39,7 +39,7 @@ def update_course_data(courses_dict, result_assignment_dict, reverse_time_dict, 
 
 if __name__ == '__main__':
     # argv[0] = kind, argv[1 + 2] = '2022/01/15', '2022/03/08'
-    data = pd.read_csv(ISA_COURSE_DATABASE2).iloc[:3, :]
+    data = pd.read_csv(ISA_COURSE_DATABASE3)
     courses = get_courses(data)
     representative_times, number_to_real_date_dict = make_domain(sys.argv[2], sys.argv[3])
     n_courses, n_times, courses_to_rows_dict, times_to_cols_dict, reverse_times_to_cols_dict = preprocess_courses(

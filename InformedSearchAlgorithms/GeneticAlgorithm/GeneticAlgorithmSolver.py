@@ -4,7 +4,7 @@ class GeneticAlgorithmSolver:
 
     def __init__(self, n_courses, n_times, courses_to_rows_dict,
                  times_to_cols_dict, reverse_times_to_cols_dict, times_to_days_dict,
-                 population_size, generations_num=100):
+                 population_size, generations_num=300):
 
         self.generation = GeneticAlgorithmGeneration(n_courses, n_times, courses_to_rows_dict,
                                                      times_to_cols_dict, reverse_times_to_cols_dict,
