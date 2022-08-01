@@ -1,10 +1,11 @@
-from InformedSearchAlgorithms.ISATimeState import *
+from InformedSearchAlgorithms.ISAState import *
 
 
 class GeneticAlgorithmGeneration:
     def __init__(self, n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
                  times_to_cols_dict, reverse_times_to_cols_dict,
-                 times_to_dates_dict, population_size):
+                 times_to_dates_dict, population_size,
+                 complex_problem=False, n_halls=None, halls_dict=None, reverse_halls_dict=None):
         self.n_courses_ = n_courses
         self.n_times_ = n_times
         self.course_to_rows_dict_ = courses_to_rows_dict
@@ -13,23 +14,35 @@ class GeneticAlgorithmGeneration:
         self.reverse_times_to_cols_dict_ = reverse_times_to_cols_dict
         self.times_to_dates_dict_ = times_to_dates_dict
         self.population_size_ = population_size
-        self.population_ = self.create_initial_population(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
-                                                          times_to_cols_dict, reverse_times_to_cols_dict,
-                                                          {}, times_to_dates_dict)
+        self.complex_problem = complex_problem
+        if complex_problem:
+            self.n_halls = n_halls
+            self.halls_dict = halls_dict
+            self.reverse_halls_dict = reverse_halls_dict
+            self.population_ = self.create_initial_population(n_courses, n_times, courses_to_rows_dict,
+                                                              reverse_courses_dict, times_to_cols_dict,
+                                                              reverse_times_to_cols_dict, {}, times_to_dates_dict,
+                                                              complex_problem, n_halls, halls_dict, reverse_halls_dict)
+        else:
+            self.population_ = self.create_initial_population(n_courses, n_times, courses_to_rows_dict,
+                                                              reverse_courses_dict, times_to_cols_dict,
+                                                              reverse_times_to_cols_dict, {}, times_to_dates_dict)
 
     def create_initial_population(self, n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
                                   times_to_cols_dict, reverse_times_to_cols_dict, assignment_dict,
-                                  times_to_dates_dict):
+                                  times_to_dates_dict, complex_problem=False, n_halls=None, halls_dict=None,
+                                  reverse_halls_dict=None):
         population = list()
         for i in range(self.population_size_):
             print(f"Creating child {i}")
             new_child = ISAState(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
-                                 reverse_times_to_cols_dict, assignment_dict, True, times_to_dates_dict)
+                                 reverse_times_to_cols_dict, assignment_dict, True, times_to_dates_dict,
+                                 complex_problem, n_halls, halls_dict, reverse_halls_dict)
             for child in population:
                 while child == new_child:
-                    new_child = ISAState(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
-                                         reverse_times_to_cols_dict, assignment_dict, True,
-                                         times_to_dates_dict)
+                    new_child = ISAState(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
+                                         times_to_cols_dict, reverse_times_to_cols_dict, assignment_dict, True,
+                                         times_to_dates_dict, complex_problem, n_halls, halls_dict, reverse_halls_dict)
             population.append(new_child)
         return population
 
@@ -72,21 +85,25 @@ class GeneticAlgorithmGeneration:
             valid_child_1 = self.check_valid_assignment(assignment1)
             valid_child_2 = self.check_valid_assignment(assignment2)
             if valid_child_1 and valid_child_2:
-                state_child1 = ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_, self.reverse_courses_dict_,
-                                        self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
-                                        assignment1, False, self.times_to_dates_dict_)
-                state_child2 = ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_, self.reverse_courses_dict_,
-                                        self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
-                                        assignment2, False, self.times_to_dates_dict_)
+                state_child1 = ISAState(self.n_courses_, self.n_times_,self.n_halls, self.course_to_rows_dict_,
+                                        self.reverse_courses_dict_,self.times_to_cols_dict_,
+                                        self.reverse_times_to_cols_dict_,assignment1, False, self.times_to_dates_dict_,
+                                        self.complex_problem, self.n_halls, self.halls_dict, self.reverse_halls_dict)
+                state_child2 = ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
+                                        self.reverse_courses_dict_, self.times_to_cols_dict_,
+                                        self.reverse_times_to_cols_dict_, assignment2, False, self.times_to_dates_dict_,
+                                        self.complex_problem, self.n_halls, self.halls_dict, self.reverse_halls_dict)
                 return state_child1 if -state_child1.get_value() > -state_child2.get_value() else state_child2
             elif valid_child_1:
                 return ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_, self.reverse_courses_dict_,
                                 self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
-                                assignment1, False, self.times_to_dates_dict_)
+                                assignment1, False, self.times_to_dates_dict_,
+                                self.complex_problem, self.n_halls, self.halls_dict, self.reverse_halls_dict)
             elif valid_child_2:
                 return ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_, self.reverse_courses_dict_,
                                 self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
-                                assignment2, False, self.times_to_dates_dict_)
+                                assignment2, False, self.times_to_dates_dict_,
+                                self.complex_problem, self.n_halls, self.halls_dict, self.reverse_halls_dict)
             else:
                 attempt += 1
 

@@ -28,7 +28,8 @@ MOED_B = 1
 
 PURE_CONSTRAINT_COURSE_DATABASE = "../Data/Courses_Data.csv"
 PURE_CONSTRAINT_COURSE_DATABASE2 = "../Data/Courses_Data2.csv"
-COURSE_ATTRIBUTES = ['name', 'number', 'faculties', 'main faculty', 'campus', 'students', 'hall_type']
+COURSE_ATTRIBUTES = ['name', 'number', 'faculties', 'campus', 'students', 'hall type']
+CLASSROOMS_ATTRIBUTES = ['name', 'area', 'capacity', 'chair type', 'classroom type']
 CHOICE_CSP = 'csp'
 CHOICE_WCSP = 'wcsp'
 BACKTRACKING = 'backtracking'
@@ -106,6 +107,7 @@ CSC_EXAM_DIFFERENCE_B = 3
 ISA_COURSE_DATABASE = "../Data/Courses_Data.csv"
 ISA_COURSE_DATABASE2 = "../Data/Courses_Data2.csv"
 ISA_COURSE_DATABASE3 = "../Data/Courses_Data3.csv"
+ISA_CLASSROOMS_DATABASE = "../Data/Classrom_Data.csv"
 UNARY_PERIODS_MOVE = 0
 UNARY_MOVE_FORWARD = 1
 UNARY_MOVE_BACKWARD = -1
@@ -119,6 +121,7 @@ N_ATTEMPTS_TO_REPRODUCE = 100
 CROSSOVER_PROB = 90
 MUTAION_PROB = 40
 PROB_DOMAIN = 100
+PENALTY_RATIO = 0.5
 
 
 # Run solvers

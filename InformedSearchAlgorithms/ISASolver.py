@@ -5,7 +5,7 @@ import pandas as pd
 from InformedSearchAlgorithms.SimulatedAnnealing.SimulatedAnnealingSolver import SimulatedAnnealingSolver
 import sys
 from InformedSearchAlgorithms.GeneticAlgorithm.GeneticAlgorithmSolver import *
-from Utils.utils import get_courses, make_domain
+from Utils.utils import get_courses, make_domain, get_halls
 
 
 def preprocess_courses(courses_list, times_list):
@@ -42,8 +42,10 @@ def update_course_data(courses_dict, result_assignment_dict, reverse_time_dict, 
 
 if __name__ == '__main__':
     # argv[0] = kind, argv[1 + 2] = '2022/01/15', '2022/03/08'
-    data = pd.read_csv(ISA_COURSE_DATABASE3)
-    courses = get_courses(data)
+    courses_data = pd.read_csv(ISA_COURSE_DATABASE3)
+    halls_data = pd.read_csv(ISA_CLASSROOMS_DATABASE)
+    courses = get_courses(courses_data)
+    halls = get_halls(halls_data)
     representative_times, number_to_real_date_dict = make_domain(sys.argv[2], sys.argv[3])
     n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict, reverse_times_to_cols_dict = \
         preprocess_courses(courses, representative_times)
