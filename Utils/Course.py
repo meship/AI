@@ -1,12 +1,12 @@
 
 
 class Course:
-    def __init__(self, name, number, faculties, type, credits, attempt, change_periods_date=None):
+    def __init__(self, name, number, faculties, n_students, hall_type, attempt, change_periods_date=None):
         self.name_ = name
         self.number_ = number
         self.faculties_ = faculties.split(", ")
-        self.type_ = type
-        self.credits_ = credits
+        self.n_students_ = n_students
+        self.hall_type_ = hall_type
         self.attempt_ = attempt
         self.exam_time_ = 0
         self.change_periods_date_ = change_periods_date
@@ -21,11 +21,11 @@ class Course:
     def get_faculties(self):
         return self.faculties_
 
-    def get_type(self):
-        return self.type_
+    def get_n_students(self):
+        return self.n_students_
 
-    def get_credits(self):
-        return self.credits_
+    def get_hall_type(self):
+        return self.hall_type_
 
     def get_attempt(self):
         return self.attempt_

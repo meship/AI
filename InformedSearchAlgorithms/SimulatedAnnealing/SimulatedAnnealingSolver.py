@@ -1,6 +1,6 @@
 import random
 
-from InformedSearchAlgorithms.ISAState import ISAState
+from InformedSearchAlgorithms.ISATimeState import ISAState
 from Utils.Constants import *
 
 

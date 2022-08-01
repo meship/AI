@@ -2,11 +2,11 @@ from InformedSearchAlgorithms.GeneticAlgorithm.GeneticAlgorithmGeneration import
 
 class GeneticAlgorithmSolver:
 
-    def __init__(self, n_courses, n_times, courses_to_rows_dict,
+    def __init__(self, n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
                  times_to_cols_dict, reverse_times_to_cols_dict, times_to_days_dict,
                  population_size, generations_num=300):
 
-        self.generation = GeneticAlgorithmGeneration(n_courses, n_times, courses_to_rows_dict,
+        self.generation = GeneticAlgorithmGeneration(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
                                                      times_to_cols_dict, reverse_times_to_cols_dict,
                                                      times_to_days_dict, population_size)
         self.generation_num = generations_num

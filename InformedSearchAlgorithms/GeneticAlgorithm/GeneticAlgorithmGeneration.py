@@ -1,31 +1,33 @@
-from InformedSearchAlgorithms.ISAState import *
+from InformedSearchAlgorithms.ISATimeState import *
 
 
 class GeneticAlgorithmGeneration:
-    def __init__(self, n_courses, n_times, courses_to_rows_dict,
+    def __init__(self, n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
                  times_to_cols_dict, reverse_times_to_cols_dict,
                  times_to_dates_dict, population_size):
         self.n_courses_ = n_courses
         self.n_times_ = n_times
         self.course_to_rows_dict_ = courses_to_rows_dict
+        self.reverse_courses_dict_ = reverse_courses_dict
         self.times_to_cols_dict_ = times_to_cols_dict
         self.reverse_times_to_cols_dict_ = reverse_times_to_cols_dict
         self.times_to_dates_dict_ = times_to_dates_dict
         self.population_size_ = population_size
-        self.population_ = self.create_initial_population(n_courses, n_times, courses_to_rows_dict,
+        self.population_ = self.create_initial_population(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
                                                           times_to_cols_dict, reverse_times_to_cols_dict,
                                                           {}, times_to_dates_dict)
 
-    def create_initial_population(self, n_courses, n_times, courses_to_rows_dict,
+    def create_initial_population(self, n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
                                   times_to_cols_dict, reverse_times_to_cols_dict, assignment_dict,
                                   times_to_dates_dict):
         population = list()
         for i in range(self.population_size_):
-            new_child = ISAState(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
+            print(f"Creating child {i}")
+            new_child = ISAState(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
                                  reverse_times_to_cols_dict, assignment_dict, True, times_to_dates_dict)
             for child in population:
                 while child == new_child:
-                    new_child = ISAState(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
+                    new_child = ISAState(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
                                          reverse_times_to_cols_dict, assignment_dict, True,
                                          times_to_dates_dict)
             population.append(new_child)
@@ -70,19 +72,19 @@ class GeneticAlgorithmGeneration:
             valid_child_1 = self.check_valid_assignment(assignment1)
             valid_child_2 = self.check_valid_assignment(assignment2)
             if valid_child_1 and valid_child_2:
-                state_child1 = ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
+                state_child1 = ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_, self.reverse_courses_dict_,
                                         self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
                                         assignment1, False, self.times_to_dates_dict_)
-                state_child2 = ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
+                state_child2 = ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_, self.reverse_courses_dict_,
                                         self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
                                         assignment2, False, self.times_to_dates_dict_)
                 return state_child1 if -state_child1.get_value() > -state_child2.get_value() else state_child2
             elif valid_child_1:
-                return ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
+                return ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_, self.reverse_courses_dict_,
                                 self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
                                 assignment1, False, self.times_to_dates_dict_)
             elif valid_child_2:
-                return ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
+                return ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_, self.reverse_courses_dict_,
                                 self.times_to_cols_dict_, self.reverse_times_to_cols_dict_,
                                 assignment2, False, self.times_to_dates_dict_)
             else:
@@ -90,9 +92,20 @@ class GeneticAlgorithmGeneration:
 
     def check_valid_assignment(self, assignment_to_check):
         # Check whether there are no equal assignments
-        assignment_vals = assignment_to_check.values()
-        if len(assignment_vals) != len(np.unique(np.array(list(assignment_vals)))):
-            return False
+        # assignment_vals = assignment_to_check.values()
+        # if len(assignment_vals) != len(np.unique(np.array(list(assignment_vals)))):
+        #     return False
+        reverse_assignment_dict = dict()
+        for course_ind, course_time in assignment_to_check.items():
+            if course_time not in reverse_assignment_dict.keys():
+                reverse_assignment_dict[course_time] = [course_ind]
+            else:
+                for already_in_course in reverse_assignment_dict[course_time]:
+                    if set(self.reverse_courses_dict_[already_in_course].get_faculties()).\
+                            intersection(set(self.reverse_courses_dict_[course_ind].get_faculties())):
+                        return False
+                reverse_assignment_dict[course_time].append(course_ind)
+
         # Check whether all the difference between two attempts remains
         for course_ind in range(self.n_courses_ // 2):
             if assignment_to_check[course_ind + self.n_courses_ // 2] - assignment_to_check[course_ind] < ATTEMPTS_DIFF:

@@ -1,25 +1,25 @@
-﻿name,number,faculties,type,credits
-Algorithms,67504,"CS, CSM, CB, ST, CSP, CSE",,
-Introduction to Probability and Statistics,80430,"CS, CSE, CB, CSC, EE",,
-Introduction to Mathematical Logic for Programmars,67501,"CS, CSE",,
-OOP,67125,"CS, CSE, CSP, CB, ST, CSM",,
-NAND,67925,"CS, CSM, CSE, CSP, ST, CSC",,
-Infinitisimal Calculus 3,80415,"CSM, M",,
-Probabiloty Theory 1,80420,"CSM, M",,
-Intermediate Macroeconomics,57305,CSE,,
-Price Theory 1,57307,CSE,,
-Analytical Mechanics,77303,"CSP, PC",,
-Waves and Optics,77305,"CSP, PC",,
-Probabiloty Theory and Applications,80312,CSP,,
-Linear Algebra 2,80135,CB,,
-Biochemistry of The Cell ,72120,CB,,
-Introduction to Statistics,52003,ST,,
-Data Structures,67109,"CSC, EE",,
-Programming Workshop in C/C++,67312,EE,,
-Neurobiology of development and learning,6168,CSC,,
-Introduction to Electrical Engireering,83335,EE,,
-Waves ans Fundamentals of Modern Physics 1,83325,EE,,
-Algebric Structures 1,80445,M,,
-Mathematichal Logic 1,80423,M,,
-Equations of Mathematical Physics,77313,PC,,
-Physical Chemistry B,69301,PC,,
+﻿name,number,faculties,campus,students,hall type
+Algorithms,67504,"CS, CSM, CB, ST, CSP, CSE",RAM,467,r
+Introduction to Probability and Statistics,80430,"CS, CSE, CB, CSC, EE",RAM,412,r
+Introduction to Mathematical Logic for Programmars,67501,"CS, CSE",RAM,149,r
+OOP,67125,"CS, CSE, CSP, CB, ST, CSM",RAM,400,c
+NAND,67925,"CS, CSM, CSE, CSP, ST, CSC",RAM,540,c
+Infinitisimal Calculus 3,80415,"CSM, M",RAM,122,r
+Probabiloty Theory 1,80420,"CSM, M",RAM,122,r
+Intermediate Macroeconomics,57305,CSE,HAR,280,r
+Price Theory 1,57307,CSE,HAR,335,r
+Analytical Mechanics,77303,"CSP, PC",RAM,132,r
+Waves and Optics,77305,"CSP, PC",RAM,154,r
+Probabiloty Theory and Applications,80312,CSP,RAM,92,r
+Linear Algebra 2,80135,CB,RAM,150,r
+Biochemistry of The Cell ,72120,CB,RAM,82,r
+Introduction to Statistics,52003,ST,HAR,34,r
+Data Structures,67109,"CSC, EE",RAM,170,r
+Programming Workshop in C/C++,67312,EE,RAM,200,c
+Neurobiology of development and learning,6168,CSC,RAM,50,r
+Introduction to Electrical Engireering,83335,EE,RAM,57,r
+Waves and Fundamentals of Modern Physics 1,83325,EE,RAM,61,r
+Algebric Structures 1,80445,M,RAM,98,r
+Mathematichal Logic 1,80423,M,RAM,148,r
+Equations of Mathematical Physics,77313,PC,RAM,150,r
+Physical Chemistry B,69301,PC,RAM,95,r

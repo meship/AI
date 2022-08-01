@@ -203,7 +203,7 @@ class CSP(ABC):
         union_constraints = self.constraints_[X_i] + self.constraints_[X_j]
         common_constraints = list()
         for constraint in union_constraints:
-            if constraint.type_ == SOFT:
+            if constraint.hall_type_ == SOFT:
                 continue
             if X_i in constraint.variables_ and X_j in constraint.variables_:
                 common_constraints.append(constraint)

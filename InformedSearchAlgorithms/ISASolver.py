@@ -12,14 +12,17 @@ def preprocess_courses(courses_list, times_list):
     n_courses = len(courses_list)
     n_times = len(times_list)
     courses_to_rows_dict = dict()
+    reverse_courses_dict = dict()
     times_to_cols_dict = dict()
     reverse_times_to_cols_dict = dict()
     for course_index, course in enumerate(courses_list):
         courses_to_rows_dict[course] = course_index
+        reverse_courses_dict[course_index] = course
     for time_index, time in enumerate(times_list):
         times_to_cols_dict[time] = time_index
         reverse_times_to_cols_dict[time_index] = time
-    return n_courses, n_times, courses_to_rows_dict, times_to_cols_dict, reverse_times_to_cols_dict
+
+    return n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict, reverse_times_to_cols_dict
 
 
 def cooling_function(temp, alpha, t):
@@ -42,14 +45,14 @@ if __name__ == '__main__':
     data = pd.read_csv(ISA_COURSE_DATABASE3)
     courses = get_courses(data)
     representative_times, number_to_real_date_dict = make_domain(sys.argv[2], sys.argv[3])
-    n_courses, n_times, courses_to_rows_dict, times_to_cols_dict, reverse_times_to_cols_dict = preprocess_courses(
-        courses, representative_times)
+    n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict, reverse_times_to_cols_dict = \
+        preprocess_courses(courses, representative_times)
     hours_dict = {MORNING_EXAM: (9, 0), NOON_EXAM: (13, 30), EVENING_EXAM: (17, 0)}
     if sys.argv[1] == SIMULATED_ANNEALING:
         print(SIMULATED_ANNEALING_MESSAGE)
-        solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict, times_to_cols_dict,
-                                          reverse_times_to_cols_dict, None, number_to_real_date_dict,
-                                          0.85, cooling_function)
+        solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict,
+                                          times_to_cols_dict, reverse_times_to_cols_dict, None,
+                                          number_to_real_date_dict, 0.85, cooling_function)
         solver.solve()
         print(solver.get_state())
         update_course_data(courses_to_rows_dict, solver.get_state().assignment_dict, reverse_times_to_cols_dict,
@@ -57,7 +60,7 @@ if __name__ == '__main__':
         solver.check_solution_quality()
     else:
         print(GENETIC_ALGORITHM_MESSAGE)
-        solver = GeneticAlgorithmSolver(n_courses, n_times, courses_to_rows_dict,
+        solver = GeneticAlgorithmSolver(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
                                         times_to_cols_dict, reverse_times_to_cols_dict, number_to_real_date_dict,
                                         POPULATION_SIZE)
         solver.solve()

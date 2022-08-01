@@ -28,7 +28,7 @@ MOED_B = 1
 
 PURE_CONSTRAINT_COURSE_DATABASE = "../Data/Courses_Data.csv"
 PURE_CONSTRAINT_COURSE_DATABASE2 = "../Data/Courses_Data2.csv"
-COURSE_ATTRIBUTES = ['name', 'number', 'faculties', 'type', 'credits', 'attempt']
+COURSE_ATTRIBUTES = ['name', 'number', 'faculties', 'main faculty', 'campus', 'students', 'hall_type']
 CHOICE_CSP = 'csp'
 CHOICE_WCSP = 'wcsp'
 BACKTRACKING = 'backtracking'

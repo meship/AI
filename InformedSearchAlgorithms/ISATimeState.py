@@ -6,22 +6,34 @@ from Utils.Constants import *
 
 class ISAState:
     # todo: courses in the requested matrix should be arranged by attempts
-    def __init__(self, n_courses, n_times, courses_to_rows_dict,
+    def __init__(self, n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
                  times_to_cols_dict, reverse_times_to_cols_dict, assignment_dict,
-                 should_initialize, times_to_dates_dict):
+                 should_initialize, times_to_dates_dict,
+                 n_halls, halls_to_cols_dict, reverse_halls_to_cols_dict,
+                 complex, halls_assigment_dict):
         self.n_courses = n_courses
         self.n_times = n_times
         self.courses_dict = courses_to_rows_dict # mapping courses objects to their indices
+        self.reverse_course_dict = reverse_courses_dict # mapping course indicies to their course object
         self.times_dict = times_to_cols_dict # mapping "representative times" to their indices
         self.reverse_times_dict = reverse_times_to_cols_dict # mapping indices to their "representative" times
+        self.n_halls_ = n_halls
+        self.halls_dict = halls_to_cols_dict  # mapping halls to their indices
+        self.reverse_halls_dict = reverse_halls_to_cols_dict  # mapping indices to hals
+        self.complex = complex
         if should_initialize:
             # self.exam_time_mat = np.zeros(shape=(n_courses, n_times))
             self.assignment_dict = dict() # mapping from courses indices to times indices
+            if complex:
+                self.halls_assignment_dict = dict()
             while self.initialize_state() == 0:
                 self.assignment_dict = dict()
+                self.halls_assignment_dict = dict()
         else:
             # self.exam_time_mat = exam_time_mat
             self.assignment_dict = assignment_dict # mapping from courses indices to times indices
+            if complex:
+                self.halls_assignment_dict = halls_assigment_dict
 
         self.days_difference = {'CS': (CS_EXAM_DIFFERENCE_A, CS_EXAM_DIFFERENCE_B),
                                 'EE': (EE_EXAM_DIFFERENCE_A, EE_EXAM_DIFFERENCE_B),
@@ -43,29 +55,72 @@ class ISAState:
         self.times_to_days_dict = times_to_dates_dict
 
     def initialize_state(self):
-        moed_a_courses_indices = np.array(range(self.n_courses // 2))
+        # moed_a_courses_indices = np.array(range(self.n_courses // 2))
         moed_a_final_date = math.floor(self.n_times * MOED_A_RATIO)
-        moed_a_times_indices = np.array(range(moed_a_final_date))
-        moed_b_times_indices = np.array(range(moed_a_final_date + 1, self.n_times))
+        # creating dict
+        moed_a_dict = dict()
+        moed_b_dict = dict()
+        for course, course_ind in self.courses_dict.items():
+            if course.get_attempt() == MOED_A:
+                moed_a_dict[course_ind] = (course, np.array(range(moed_a_final_date)))
+            else:
+                moed_b_dict[course_ind] = (course, np.array(range(moed_a_final_date + 1, self.n_times)))
+
+
+        # moed_a_times_indices = np.array(range(moed_a_final_date))
+        # moed_b_times_indices = np.array(range(moed_a_final_date + 1, self.n_times))
         n_courses_assigned = 0
+        available_moed_a_courses = np.array(list(moed_a_dict.keys()))
+        available_halls  = dict()
+        for hall_ind in range(self.n_halls_):
+            available_halls[hall_ind] = [MORNING_EXAM, NOON_EXAM, EVENING_EXAM]
+
         while n_courses_assigned < self.n_courses // 2:
-            current_moed_a = np.random.choice(moed_a_courses_indices)
-            current_moed_a_time = np.random.choice(moed_a_times_indices)
+            current_moed_a = np.random.choice(available_moed_a_courses)
+            current_moed_a_time = np.random.choice(moed_a_dict[current_moed_a][1])
+            available_halls = self.assign_halls(current_moed_a, available_halls)
             current_moed_b = current_moed_a + self.n_courses // 2
-            available_moed_b_times = moed_b_times_indices[moed_b_times_indices >= current_moed_a_time + ATTEMPTS_DIFF]
+            available_moed_b_times = moed_b_dict[current_moed_b][1]
+            available_moed_b_times = available_moed_b_times[available_moed_b_times >= current_moed_a_time + ATTEMPTS_DIFF]
             if not len(available_moed_b_times):
                 return 0
             current_moed_b_time = np.random.choice(available_moed_b_times)
+            available_halls = self.assign_halls(current_moed_b, available_halls)
             self.assignment_dict[current_moed_a] = current_moed_a_time
             self.assignment_dict[current_moed_b] = current_moed_b_time
-            moed_a_ind = np.argwhere(moed_a_courses_indices == current_moed_a)
-            moed_a_courses_indices = np.delete(moed_a_courses_indices, moed_a_ind)
-            moed_a_time_ind = np.argwhere(moed_a_times_indices == current_moed_a_time)
-            moed_a_times_indices = np.delete(moed_a_times_indices, moed_a_time_ind)
-            moed_b_time_ind = np.argwhere(moed_b_times_indices == current_moed_b_time)
-            moed_b_times_indices = np.delete(moed_b_times_indices, moed_b_time_ind)
+            # updating the dicts
+            moed_a_ind = np.argwhere(available_moed_a_courses == current_moed_a)
+            available_moed_a_courses = np.delete(available_moed_a_courses, moed_a_ind)
+            # moed_a_time_ind = np.argwhere(moed_a_times_indices == current_moed_a_time)
+            # moed_a_times_indices = np.delete(moed_a_times_indices, moed_a_time_ind)
+            current_moed_a_course = moed_a_dict[current_moed_a][0]
+            for course, course_ind in self.courses_dict.items():
+                if course_ind == current_moed_a:
+                    continue
+                elif set(course.get_faculties()).intersection(set(current_moed_a_course.get_faculties())):
+                    if course.get_attempt() == MOED_A:
+                        moed_a_time_ind = np.argwhere(moed_a_dict[course_ind][1] == current_moed_a_time)
+                        moed_a_dict[course_ind] = (course, np.delete(moed_a_dict[course_ind][1], moed_a_time_ind))
+                    else:
+                        moed_b_time_ind = np.argwhere(moed_b_dict[course_ind][1] == current_moed_b_time)
+                        moed_b_dict[course_ind] = (course, np.delete(moed_b_dict[course_ind][1], moed_b_time_ind))
             n_courses_assigned += 1
         return 1
+
+    def assign_halls(self, course_ind, available_halls):
+        course = self.reverse_course_dict[course_ind]
+        num_of_assigned_students = 0
+        while num_of_assigned_students < course.get_number():
+            current_hall = np.random.choice(available_halls)
+            current_hall_ind = np.argwhere(available_halls == current_hall)
+            available_halls = np.delete(available_halls, current_hall_ind)
+            if course_ind not in self.halls_assignment_dict.keys():
+                self.halls_assignment_dict[course_ind] = current_hall_ind
+            else:
+                self.halls_assignment_dict[course_ind].append(current_hall_ind)
+            num_of_assigned_students += self.reverse_halls_dict[current_hall].get_capacity()
+        return available_halls
+
 
     def calculate_days_(self, pair):
         for faculty in self.days_difference:
@@ -173,10 +228,10 @@ class ISAState:
             if exam_new_col <= exam_separation_day:
                 return False
         # Check whether the requested slot is not empty
-        for assignment in self.assignment_dict.values():
+        for course_ind, assignment in self.assignment_dict.items():
             if assignment == exam_new_col:
-                return False
-
+                if set(self.reverse_course_dict[exam_row].get_faculties()).intersection(self.reverse_course_dict[course_ind].get_faculties()):
+                    return False
         return True
 
     def apply_move(self, move):

@@ -61,6 +61,7 @@ def get_courses(given_data):
                                   given_data[COURSE_ATTRIBUTES[2]][index],
                                   given_data[COURSE_ATTRIBUTES[3]][index],
                                   given_data[COURSE_ATTRIBUTES[4]][index],
+                                  given_data[COURSE_ATTRIBUTES[5]][index],
                                   moed[0]))
     return courses
 
