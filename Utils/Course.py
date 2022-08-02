@@ -1,10 +1,11 @@
 
 
 class Course:
-    def __init__(self, name, number, faculties, n_students, hall_type, attempt, change_periods_date=None):
+    def __init__(self, name, number, faculties, campus, n_students, hall_type, attempt, change_periods_date=None):
         self.name_ = name
         self.number_ = number
         self.faculties_ = faculties.split(", ")
+        self.campus = campus
         self.n_students_ = n_students
         self.hall_type_ = hall_type
         self.attempt_ = attempt

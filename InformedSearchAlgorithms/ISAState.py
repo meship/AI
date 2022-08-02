@@ -2,15 +2,16 @@ import itertools
 import math
 
 from Utils.Constants import *
-
+from Utils.utils import update_dict
+import copy
 
 class ISAState:
 	# todo: courses in the requested matrix should be arranged by attempts
 	def __init__(self, n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
-				 times_to_cols_dict, reverse_times_to_cols_dict, assignment_dict,
+				 times_to_cols_dict, reverse_times_to_cols_dict, assignment_dict, reverse_assignment_dict,
 				 times_to_dates_dict, should_initialize=True, complex_problem=False, n_halls=None,
 				 halls_to_cols_dict=None, reverse_halls_to_cols_dict=None,
-				 halls_assigment_dict=None):
+				 halls_assignment_dict=None):
 		self.n_courses = n_courses
 		self.n_times = n_times
 		self.courses_dict = courses_to_rows_dict  # mapping courses objects to their indices
@@ -23,18 +24,28 @@ class ISAState:
 			self.n_halls_ = n_halls
 			self.halls_dict = halls_to_cols_dict  # mapping halls to their indices
 			self.reverse_halls_dict = reverse_halls_to_cols_dict  # mapping indices to hals
-		if should_initialize:
-			# self.exam_time_mat = np.zeros(shape=(n_courses, n_times))
-			self.assignment_dict = dict()  # mapping from courses indices to times indices
-			if complex_problem:
+		if complex_problem:
+			if should_initialize:
+				# self.exam_time_mat = np.zeros(shape=(n_courses, n_times))
+				self.assignment_dict = dict()  # mapping from courses indices to times indices
 				self.halls_assignment_dict = dict()
-			while self.initialize_state() == 0:
-				self.assignment_dict = dict()
-				self.halls_assignment_dict = dict()
+				while self.initialize_state() == 0:
+					self.assignment_dict = dict()
+					self.halls_assignment_dict = dict()
+			else:
+				self.assignment_dict = assignment_dict  # mapping from courses indices to times indices
+				self.halls_assignment_dict = halls_assignment_dict
 		else:
-			self.assignment_dict = assignment_dict  # mapping from courses indices to times indices
-			if complex_problem:
-				self.halls_assignment_dict = halls_assigment_dict
+			if should_initialize:
+				# self.exam_time_mat = np.zeros(shape=(n_courses, n_times))
+				self.assignment_dict = dict() # mapping from courses indices to times indices
+				self.reverse_assignment_dict = dict()
+				while self.initialize_state() == 0:
+					self.assignment_dict = dict()
+					self.reverse_assignment_dict = dict()
+			else:
+				self.assignment_dict = assignment_dict  # mapping from courses indices to times indices
+				self.reverse_assignment_dict = reverse_assignment_dict
 
 		self.days_difference = {'CS': (CS_EXAM_DIFFERENCE_A, CS_EXAM_DIFFERENCE_B),
 								'EE': (EE_EXAM_DIFFERENCE_A, EE_EXAM_DIFFERENCE_B),
@@ -54,7 +65,6 @@ class ISAState:
 		for pair in pairs_permutations:
 			self.calculate_days_(pair)
 
-
 	def initialize_state(self):
 		moed_a_final_date = math.floor(self.n_times * MOED_A_RATIO)
 		# creating dict
@@ -62,12 +72,14 @@ class ISAState:
 
 		n_courses_assigned = 0
 		available_moed_a_courses = np.array(list(moed_a_dict.keys()))
-		unavailable_halls_dict = self.make_halls_dict()
+		if self.complex_problem:
+			unavailable_halls_dict = self.make_halls_dict()
 
 		while n_courses_assigned < self.n_courses // 2:
 			current_moed_a = np.random.choice(available_moed_a_courses)
 			current_moed_a_time = np.random.choice(moed_a_dict[current_moed_a][1])
-			halls_list_a = self.assign_halls(current_moed_a, current_moed_a_time, unavailable_halls_dict)
+			if self.complex_problem:
+				halls_list_a = self.assign_halls(current_moed_a, current_moed_a_time, unavailable_halls_dict)
 			current_moed_b = current_moed_a + self.n_courses // 2
 			available_moed_b_times = moed_b_dict[current_moed_b][1]
 			available_moed_b_times = available_moed_b_times[
@@ -75,17 +87,34 @@ class ISAState:
 			if not len(available_moed_b_times):
 				return 0
 			current_moed_b_time = np.random.choice(available_moed_b_times)
-			halls_list_b = self.assign_halls(current_moed_b, current_moed_b_time, unavailable_halls_dict)
+			if self.complex_problem:
+				halls_list_b = self.assign_halls(current_moed_b, current_moed_b_time, unavailable_halls_dict)
+				self.halls_assignment_dict[current_moed_a] = halls_list_a
+				self.halls_assignment_dict[current_moed_b] = halls_list_b
 			self.assignment_dict[current_moed_a] = current_moed_a_time
-			self.halls_assignment_dict[current_moed_a] = halls_list_a
+			update_dict(current_moed_a_time, current_moed_a, self.reverse_assignment_dict)
+			student_count = 0
+			for course in self.reverse_assignment_dict[current_moed_a_time]:
+				student_count += self.reverse_course_dict[course].get_n_students()
+				if student_count > 540:  # max curse students
+					return 0
+
 			self.assignment_dict[current_moed_b] = current_moed_b_time
-			self.halls_assignment_dict[current_moed_b] = halls_list_b
+			update_dict(current_moed_b_time, current_moed_b, self.reverse_assignment_dict)
+
+			student_count = 0
+			for course in self.reverse_assignment_dict[current_moed_b_time]:
+				student_count += self.reverse_course_dict[course].get_n_students()
+				if student_count > 540:  # max curse students
+					return 0
+
 			# updating the dicts
 			moed_a_ind = np.argwhere(available_moed_a_courses == current_moed_a)
 			available_moed_a_courses = np.delete(available_moed_a_courses, moed_a_ind)
 			self.update_available_time(current_moed_a, current_moed_a_time, current_moed_b_time, moed_a_dict,
 									   moed_b_dict)
 			n_courses_assigned += 1
+
 		return 1
 
 	def update_available_time(self, current_moed_a, current_moed_a_time, current_moed_b_time, moed_a_dict, moed_b_dict):
@@ -247,14 +276,27 @@ class ISAState:
 				if set(self.reverse_course_dict[exam_row].get_faculties()).intersection(
 						self.reverse_course_dict[course_ind].get_faculties()):
 					return False
+		student_count = 0
+		if exam_new_col in self.reverse_assignment_dict.keys():
+			for course_ind in self.reverse_assignment_dict[exam_new_col]:
+					student_count += self.reverse_course_dict[course_ind].get_n_students()
+					if student_count > 540:  # max curse students
+						return False
 		return True
 
 	def apply_move(self, move):
 		if move.type == UNARY_PERIODS_MOVE:
 			self.assignment_dict[move.new_row] = move.new_col
+			self.reverse_assignment_dict[move.old_col].remove(move.old_row)
+			update_dict(move.new_col, move.new_row, self.reverse_assignment_dict)
 		else:
 			self.assignment_dict[move.first_row] = move.second_col
+			self.reverse_assignment_dict[move.first_col].remove(move.first_row)
+			update_dict(move.second_col, move.first_row, self.reverse_assignment_dict)
+
 			self.assignment_dict[move.second_row] = move.first_col
+			self.reverse_assignment_dict[move.second_col].remove(move.second_row)
+			update_dict(move.first_col, move.second_row, self.reverse_assignment_dict)
 
 	def get_value(self):
 		# Check satisfaction of soft constraints and return the representative value
@@ -271,7 +313,7 @@ class ISAState:
 		for course_pair in course_permutations:
 			actual_pair_diff = self.get_course_time_diff(course_pair)
 			diff_from_optimal = max(0, self.pairs_difference[course_pair] - actual_pair_diff)
-			if diff_from_optimal >= PENALTY_RATIO * self.pairs_difference[course_pair]:
+			if diff_from_optimal >= PENALTY_RATIO * self.pairs_difference[course_pair]: # todo check
 				diff_from_optimal = diff_from_optimal * 2
 			state_value += diff_from_optimal
 		return state_value
@@ -348,12 +390,17 @@ class ISAState:
 		c_n_courses = self.n_courses
 		c_n_times = self.n_times
 		c_courses_dict = self.courses_dict.copy()
+		c_reverse_course_dict = self.reverse_course_dict
 		c_times_dict = self.times_dict
 		c_n_reverse_times_dict = self.reverse_times_dict
 		c_assignment_dict = self.assignment_dict.copy()
 		c_n_times_to_days_dict = self.times_to_days_dict
-		return ISAState(c_n_courses, c_n_times, c_courses_dict, c_times_dict,
-						c_n_reverse_times_dict, c_assignment_dict, False, c_n_times_to_days_dict)
+		c_n_reverse_assignment_dict = copy.deepcopy(self.reverse_assignment_dict)
+
+
+		return ISAState(c_n_courses, c_n_times, c_courses_dict, c_reverse_course_dict, c_times_dict,
+						c_n_reverse_times_dict,c_assignment_dict,c_n_reverse_assignment_dict,c_n_times_to_days_dict,
+						False)
 
 	def __repr__(self):
 		repr_val = "Exam Scheduling Is:\n"

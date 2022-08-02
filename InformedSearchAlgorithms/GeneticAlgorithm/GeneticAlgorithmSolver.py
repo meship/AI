@@ -4,11 +4,13 @@ class GeneticAlgorithmSolver:
 
     def __init__(self, n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
                  times_to_cols_dict, reverse_times_to_cols_dict, times_to_days_dict,
-                 population_size, generations_num=300):
+                 population_size, generations_num=300,
+                 complex_problem=False, n_halls=None, halls_dict=None, reverse_halls_dict=None):
 
         self.generation = GeneticAlgorithmGeneration(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
                                                      times_to_cols_dict, reverse_times_to_cols_dict,
-                                                     times_to_days_dict, population_size)
+                                                     times_to_days_dict, population_size, complex_problem,
+                                                     n_halls, halls_dict, reverse_halls_dict)
         self.generation_num = generations_num
         self.best_child = None
 
@@ -20,7 +22,7 @@ class GeneticAlgorithmSolver:
         for child in self.generation.population_:
             current_value = child.get_value()
             if current_value < best_value:
-                best_value  = current_value
+                best_value = current_value
                 best_child = child
         self.best_child = best_child
 

@@ -138,3 +138,9 @@ def make_domain(start_date, end_date):
 	return np.array(domain), number_to_real_date_dict
 
 #######################################################################
+
+def update_dict(key, value, dict):
+	if key not in dict.keys():
+		dict[key] = [value]
+	else:
+		dict[key].append(value)

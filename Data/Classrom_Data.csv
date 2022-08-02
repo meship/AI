@@ -6,10 +6,12 @@ B100,2,80,None,c
 C100,2,80,None,c
 C101,2,25,None,c
 C120,2,80,None,c
-,,,,
-,,,,
-,,,,
-,,,,
+B220,2,20,r,r
+B221,2,20,r,r
+C220,2,20,r,r
+C221,2,20,r,r
+C320,2,20,r,r
+C321,2,20,r,r
 Canada ,1,60,r,r
 Upper Canada ,1,15,s,r
 Levin ,3,70,r,r
