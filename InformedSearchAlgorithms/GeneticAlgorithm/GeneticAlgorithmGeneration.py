@@ -52,7 +52,7 @@ class GeneticAlgorithmGeneration:
         probabilities = probabilities / sum(probabilities)
         children_amount = 0
         while children_amount < self.population_size_:
-            parents = np.random.choice(a=self.population_, size=2, replace=True, p=probabilities)
+            parents = np.random.choice(a=self.population_, size=2, replace=False, p=probabilities)
             if np.random.choice(PROB_DOMAIN) <= CROSSOVER_PROB:
                 child = self.reproduce(parents[0], parents[1], N_ATTEMPTS_TO_REPRODUCE)
                 if child is not None:

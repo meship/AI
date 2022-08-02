@@ -313,7 +313,7 @@ class ISAState:
 		for course_pair in course_permutations:
 			actual_pair_diff = self.get_course_time_diff(course_pair)
 			diff_from_optimal = max(0, self.pairs_difference[course_pair] - actual_pair_diff)
-			if diff_from_optimal >= PENALTY_RATIO * self.pairs_difference[course_pair]: # todo check
+			if diff_from_optimal >= 3: #:PENALTY_RATIO * self.pairs_difference[course_pair]: # todo check
 				diff_from_optimal = diff_from_optimal * 2
 			state_value += diff_from_optimal
 		return state_value

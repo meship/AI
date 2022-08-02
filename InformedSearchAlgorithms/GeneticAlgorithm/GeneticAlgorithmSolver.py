@@ -1,16 +1,25 @@
 from InformedSearchAlgorithms.GeneticAlgorithm.GeneticAlgorithmGeneration import *
+from InformedSearchAlgorithms.GeneticAlgorithm.GeneticAlgorithmComplexGeneration import *
+
 
 class GeneticAlgorithmSolver:
 
     def __init__(self, n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
                  times_to_cols_dict, reverse_times_to_cols_dict, times_to_days_dict,
-                 population_size, generations_num=300,
-                 complex_problem=False, n_halls=None, halls_dict=None, reverse_halls_dict=None):
+                 population_size, generations_num=2,
+                 complex_problem=False, n_halls=None, halls_to_cols_dict=None, reverse_halls_to_col_dict=None,
+                 time_assignment_dict={}):
 
-        self.generation = GeneticAlgorithmGeneration(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
-                                                     times_to_cols_dict, reverse_times_to_cols_dict,
-                                                     times_to_days_dict, population_size, complex_problem,
-                                                     n_halls, halls_dict, reverse_halls_dict)
+        if not complex_problem:
+            self.generation = GeneticAlgorithmGeneration(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
+                                                         times_to_cols_dict, reverse_times_to_cols_dict,
+                                                         times_to_days_dict, population_size, complex_problem,
+                                                         n_halls, halls_to_cols_dict, reverse_halls_to_col_dict)
+        else:
+            self.generation = GeneticAlgorithmComplexGeneration(n_courses, n_times, n_halls, courses_to_rows_dict,
+                                                                reverse_courses_dict, halls_to_cols_dict,
+                                                                reverse_halls_to_col_dict, time_assignment_dict,
+                                                                population_size)
         self.generation_num = generations_num
         self.best_child = None
 

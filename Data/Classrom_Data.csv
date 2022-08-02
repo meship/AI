@@ -1,11 +1,11 @@
 ﻿name,area,capacity,chair type,classroom type
 Auditorium,2,100,r,r
-A101,2,80,None,c
-A100,2,25,None,c
-B100,2,80,None,c
-C100,2,80,None,c
-C101,2,25,None,c
-C120,2,80,None,c
+A101,2,100,None,c
+A100,2,100,None,c
+B100,2,100,None,c
+C100,2,100,None,c
+C101,2,100,None,c
+C120,2,100,None,c
 B220,2,20,r,r
 B221,2,20,r,r
 C220,2,20,r,r

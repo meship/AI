@@ -1,8 +1,8 @@
-class Classroom:
-	def __init__(self, name, area, classroom_type, chair_type, capacity):
+class Hall:
+	def __init__(self, name, area, capacity, chair_type, hall_type):
 		self.name_ = name
 		self.area_ = area
-		self.classroom_type_ = classroom_type
+		self.hall_type_ = hall_type
 		self.chair_type_ = chair_type
 		self.capacity_ = capacity
 
@@ -12,8 +12,8 @@ class Classroom:
 	def get_area(self):
 		return self.area_
 
-	def get_clasroom_type(self):
-		return self.classroom_type_
+	def get_hall_type(self):
+		return self.hall_type_
 
 	def get_chair_type(self):
 		return self.chair_type_

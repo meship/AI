@@ -131,7 +131,13 @@ GENETIC_ALGORITHM = "ga"
 SIMULATED_ANNEALING_MESSAGE = "Chosen algorithm is Simulated Annealing"
 GENETIC_ALGORITHM_MESSAGE = "Chosen algorithm is Genetic Algorithm"
 POPULATION_SIZE = 92
-
+POPULATION_SIZE_COMPLEX = 62
+#############################################################
+################ Extended problem ###########################
+#############################################################
+UNARY_HALL_MOVE = 0
+BINARY_HALL_MOVE = 1
+CONTINUE_TO_COMPLEX_MESSAGE = "Do you wish to assign halls as well? y/n\n"
 
 #############################################################
 ######################## Utils ##############################

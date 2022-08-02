@@ -12,6 +12,7 @@ class Course:
         self.exam_time_ = 0
         self.change_periods_date_ = change_periods_date
         self.exam_id_ = None
+        self.halls_assigned_ = None
 
     def get_name(self):
         return self.name_
@@ -40,11 +41,17 @@ class Course:
     def get_exam_id(self):
         return self.exam_id_
 
+    def get_halls_assigned():
+        return self.halls_assigned_
+
     def set_exam_time(self, time):
         self.exam_time_ = time
 
     def set_exam_id(self, exam_id):
         self.exam_id_ = exam_id
+
+    def set_halls(self, halls):
+        self.halls_assigned_ = halls
 
     def __repr__(self):
         return self.name_
