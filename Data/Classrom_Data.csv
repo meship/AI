@@ -1,0 +1,29 @@
+﻿name,area,capacity,chair type,classroom type
+Auditorium,2,100,r,r
+A101,2,80,None,c
+A100,2,25,None,c
+B100,2,80,None,c
+C100,2,80,None,c
+C101,2,25,None,c
+C120,2,80,None,c
+,,,,
+,,,,
+,,,,
+,,,,
+Canada ,1,60,r,r
+Upper Canada ,1,15,s,r
+Levin ,3,70,r,r
+Mathematics 110,4,30,s,r
+Mathematics 2,4,30,s,r
+Chemestry 7,5,120,r,r
+Feldman A,11,70,r,r
+Feldman B,11,70,r,r
+Sprinzak 115,12,25,s,r
+Sprinzak 117,12,25,s,r
+Sprinzak 25,12,25,s,r
+Sprinzak 35,12,25,s,r
+Sprinzak Computer Farm,12,50,None,c
+Levi 6,13,50,r,r
+Levi 7,13,50,r,r
+Rothberg,15,50,r,r
+Kaplan,15,70,s,s
