@@ -41,7 +41,7 @@ class Course:
     def get_exam_id(self):
         return self.exam_id_
 
-    def get_halls_assigned():
+    def get_halls_assigned(self):
         return self.halls_assigned_
 
     def set_exam_time(self, time):
@@ -51,7 +51,7 @@ class Course:
         self.exam_id_ = exam_id
 
     def set_halls(self, halls):
-        self.halls_assigned_ = halls
+        self.halls_assigned_ = halls.copy()
 
     def __repr__(self):
         return self.name_

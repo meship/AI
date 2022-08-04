@@ -33,10 +33,11 @@ def create_event(course, complex):
 	start_time = course.get_exam_time()
 	end_time = start_time + timedelta(hours=3)
 	course.set_exam_id("".join(str(uuid.uuid4()).split("-")))
+	course_list = ",".join(course.get_halls_assigned()) if complex == 'y' else ''
 	return {
 		'summary': course.get_name(),
 		'id': course.get_exam_id(),
-		'location': course.get_halls_assigned() if complex == 'y' else '',
+		'location': course_list,
 		'colorId': str(course.get_number())[0],
 		'description': 'Exam',
 		'start': {
@@ -148,6 +149,6 @@ def update_dict(key, value, dict):
 
 def add_list_to_dict(key, list, dict):
 	if key not in dict.keys():
-		dict[key] = list
+		dict[key] = list.copy()
 	else:
 		dict[key] += list

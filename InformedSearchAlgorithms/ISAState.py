@@ -97,6 +97,7 @@ class ISAState:
 			for course in self.reverse_assignment_dict[current_moed_a_time]:
 				student_count += self.reverse_course_dict[course].get_n_students()
 				if student_count > 540:  # max curse students
+					# todo: need to add another constaint - think more
 					return 0
 
 			self.assignment_dict[current_moed_b] = current_moed_b_time

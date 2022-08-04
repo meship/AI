@@ -2,6 +2,7 @@ from datetime import datetime
 from Utils.utils import export_to_calendar
 
 import pandas as pd
+import json
 from InformedSearchAlgorithms.SimulatedAnnealing.SimulatedAnnealingSolver import SimulatedAnnealingSolver
 import sys
 from InformedSearchAlgorithms.GeneticAlgorithm.GeneticAlgorithmSolver import *
@@ -47,9 +48,10 @@ def update_course_time_data(courses_dict, result_assignment_dict, reverse_time_d
         course.set_exam_time(datetime(year, month, day, hours[repr_time][0], hours[repr_time][1], 0))
 
 
-def update_course_hall_data(courses_dict, result_assignment_dict):
+def update_course_hall_data(courses_dict, result_assignment_dict, reverse_halls_to_col_dict):
     for course, course_ind in courses_dict.items():
-        course.set_halls(result_assignment_dict[course_ind])
+        halls = [reverse_halls_to_col_dict[hall].get_name() for hall in result_assignment_dict[course_ind]]
+        course.set_halls(halls)
 
 
 if __name__ == '__main__':
@@ -74,12 +76,13 @@ if __name__ == '__main__':
         print(GENETIC_ALGORITHM_MESSAGE)
         solver = GeneticAlgorithmSolver(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
                                         times_to_cols_dict, reverse_times_to_cols_dict, number_to_real_date_dict,
-                                        POPULATION_SIZE)
+                                        POPULATION_SIZE, 2)
         solver.solve()
         print(solver.get_best_child())
         update_course_time_data(courses_to_rows_dict, solver.get_best_child().assignment_dict, reverse_times_to_cols_dict,
                                 number_to_real_date_dict, hours_dict)
         solver.check_solution_quality()
+
         answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
         if answer == 'y':
             halls_data = pd.read_csv(ISA_CLASSROOMS_DATABASE)
@@ -88,14 +91,15 @@ if __name__ == '__main__':
             complex_solver = GeneticAlgorithmSolver(n_courses, n_times, courses_to_rows_dict,
                                                     reverse_courses_dict, times_to_cols_dict,
                                                     reverse_times_to_cols_dict, number_to_real_date_dict,
-                                                    POPULATION_SIZE_COMPLEX,
+                                                    POPULATION_SIZE_COMPLEX, 300,
                                                     complex_problem=True, n_halls=n_halls,
                                                     halls_to_cols_dict=halls_to_cols_dict,
                                                     reverse_halls_to_col_dict=reverse_halls_to_col_dict,
                                                     time_assignment_dict=solver.get_best_child().assignment_dict)
-            update_course_hall_data(courses_to_rows_dict, complex_solver.get_best_child().halls_dict)
-
-
+            complex_solver.solve()
+            update_course_hall_data(courses_to_rows_dict, complex_solver.get_best_child().halls_assignment_dict,
+                                    reverse_halls_to_col_dict)
+            complex_solver.check_hall_solution_quality()
 
     # scopes = ["https://www.googleapis.com/auth/calendar"]
     # flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=scopes)

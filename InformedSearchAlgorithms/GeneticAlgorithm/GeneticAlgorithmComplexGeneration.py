@@ -42,6 +42,12 @@ class GeneticAlgorithmComplexGeneration:
         for i, element in enumerate(self.population_):
             probabilities[i] = -element.get_value()
         probabilities -= probabilities.min()
+        if sum(probabilities) == 0:
+            for course, halls in self.population_[0].halls_assignment_dict.items():
+                str = f"({self.time_assignment_dict[course]}) {self.reverse_courses_dict[course]}: "
+                for hall in halls:
+                    str += self.reverse_halls_to_col_dict[hall].get_name() + " "
+                print(str)
         probabilities = probabilities / sum(probabilities)
         children_amount = 0
         while children_amount < self.population_size_:
@@ -61,10 +67,10 @@ class GeneticAlgorithmComplexGeneration:
         valid_child_1, valid_child_2 = False, False
         attempt = 0
         while not valid_child_1 and not valid_child_2 and attempt < n_attempts:
-            cross_over_point = np.random.choice(self.n_courses_)
+            cross_over_point = np.random.choice(self.n_courses)
             assignment1, assignment2 = dict(), dict()
             time_to_halls_dict1, time_to_halls_dict2 = dict(), dict()
-            for i in range(self.n_courses_):
+            for i in range(self.n_courses):
                 if i <= cross_over_point:
                     assignment1[i] = parent1.halls_assignment_dict[i]
                     assignment2[i] = parent2.halls_assignment_dict[i]
@@ -75,7 +81,7 @@ class GeneticAlgorithmComplexGeneration:
             for course_ind, course_halls in assignment1.items():
                 add_list_to_dict(self.time_assignment_dict[course_ind], course_halls, time_to_halls_dict1)
 
-            for course_ind, course_time in assignment2.items():
+            for course_ind, course_halls in assignment2.items():
                 add_list_to_dict(self.time_assignment_dict[course_ind], course_halls, time_to_halls_dict2)
 
             valid_child_1 = self.check_valid_assignment(time_to_halls_dict1)
@@ -85,23 +91,23 @@ class GeneticAlgorithmComplexGeneration:
                 state_child1 = ISAHallState(self.n_courses, self.n_times, self.n_halls, self.course_to_row_dict,
                                             self.reverse_courses_dict, self.halls_to_cols_dict,
                                             self.reverse_halls_to_col_dict, self.time_assignment_dict,
-                                            False, assignment1, time_to_halls_dict1)
+                                            False, assignment1, time_to_halls_dict1.copy())
 
                 state_child2 = ISAHallState(self.n_courses, self.n_times, self.n_halls, self.course_to_row_dict,
                                             self.reverse_courses_dict, self.halls_to_cols_dict,
                                             self.reverse_halls_to_col_dict, self.time_assignment_dict,
-                                            False, assignment2, time_to_halls_dict2)
+                                            False, assignment2, time_to_halls_dict2.copy())
                 return state_child1 if -state_child1.get_value() > -state_child2.get_value() else state_child2
             elif valid_child_1:
                 return ISAHallState(self.n_courses, self.n_times, self.n_halls, self.course_to_row_dict,
                                             self.reverse_courses_dict, self.halls_to_cols_dict,
                                             self.reverse_halls_to_col_dict, self.time_assignment_dict,
-                                            False, assignment1, time_to_halls_dict1)
+                                            False, assignment1, time_to_halls_dict1.copy())
             elif valid_child_2:
                 return ISAHallState(self.n_courses, self.n_times, self.n_halls, self.course_to_row_dict,
                                             self.reverse_courses_dict, self.halls_to_cols_dict,
                                             self.reverse_halls_to_col_dict, self.time_assignment_dict,
-                                            False, assignment2, time_to_halls_dict2)
+                                            False, assignment2, time_to_halls_dict2.copy())
             else:
                 attempt += 1
 
@@ -112,19 +118,24 @@ class GeneticAlgorithmComplexGeneration:
                 return False
         return True
 
-
     def mutate(self, child):
         if np.random.choice(PROB_DOMAIN) <= MUTAION_PROB:
             # randomly choosing how many courses will be mutated
-            number_of_genes = np.random.choice(range(self.n_courses_//4, self.n_courses_//2))
-            chosen_courses_ind = np.random.choice(range(self.n_courses_), size=number_of_genes, replace=False)
+            number_of_genes = np.random.choice(range(self.n_courses//2, self.n_courses))
+            chosen_courses_ind = np.random.choice(range(self.n_courses), size=number_of_genes, replace=False)
             for course_ind in chosen_courses_ind:
                 # make the mutate
-                move = np.random.choice([HallUnaryMove, HallBinaryMove])
-                if move == UNARY_PERIODS_MOVE:
-                    child.apply_hall_unary_move(course_ind, child.assignment_dict[course_ind])
+                # child.apply_try_move(course_ind, child.time_assignment_dict[course_ind])
+                move = np.random.choice([0, 1, ADD_HALL, REMOVE_HALL],
+                                        p=[0.5, 0.5, 0, 0])
+                if move == 0:
+                    child.apply_hall_unary_move(course_ind, child.time_assignment_dict[course_ind])
+                elif move == 1:
+                    child.apply_hall_binary_move(course_ind, child.time_assignment_dict[course_ind])
+                elif move == ADD_HALL:
+                    child.apply_hall_add_move(course_ind, child.time_assignment_dict[course_ind])
                 else:
-                    child.apply_hall_binary_move(course_ind, child.assignment_dict[course_ind])
+                    child.apply_hall_remove_move(course_ind, child.time_assignment_dict[course_ind])
         return child
 
 
