@@ -5,7 +5,7 @@ import sys
 from Utils.utils import make_domain, make_variables
 
 
-def solve_CSP():
+def solve_CSP(variables, domain, change_periods_date):
     variables.sort(key=lambda x: x.get_attempt())
     CSP_Exam = CSPExams(variables, domain, change_periods_date)
     CSP_Exam.create_constraints()
@@ -23,7 +23,7 @@ def solve_CSP():
         return CSP_Exam.both_heuristics({}, CSP_Exam.domains_)
 
 
-def solve_WCSP():
+def solve_WCSP(variables, domain, change_periods_date):
     wscp_exams = WCSPExams(variables=variables, domains=domain, change_periods_date=change_periods_date,
                            k=MAXIMUM_COST)
     wscp_exams.create_constraints()
@@ -39,6 +39,6 @@ if __name__ == '__main__':
     change_periods_date = int(MOED_A_RATIO * len(domain))
     variables = make_variables(change_periods_date)
     if sys.argv[1] == CHOICE_CSP:
-        solve_CSP()
+        solve_CSP(variables, domain, change_periods_date)
     else:
-        solve_WCSP()
+        solve_WCSP(variables, domain, change_periods_date)

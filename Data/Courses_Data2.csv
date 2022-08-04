@@ -1,18 +1,18 @@
-﻿name,number,faculties,type,credits
-Introduction to Computer Science,67101,"CS, CSM, CSE, CSP, CB, ST",,
-Discrete Mathematics,80181,"CS, ST, CSM, CSP, EE, M, CSP",,
-Linear Algebra 1,80134,"CS, CSM, CSE, M, CB",,
-Infinitesimal Calculus,80131,"CS, ST, CSM, M, CSE, CB",,
-General Chemistry For Biology  Students,69174,"CB, PSB",,
-Biologic Basic,72160,"CB, PSB",,
-21st Century Biology - Selected Topics A,76559,CB,,
-Mathematical Methods I,80114,"ST, CSP, EE",,
-Introduction to Economics 1,57107,CSE,,
-Linear algebra for engineering and science students 1,80153,EE,,
-Mechanics and Special Relativity for Engineering,83312,EE,,
-Introduction to Biology and Evolution of Organisms,72128,BC,,
-Introduction to Cell Biology,72153,BC,,
-Mathematics for Chemistry Students 1,80109,BC,,
-General Phys.- Mechanics For Chem. & Earth Students,77130,BC,,
-Mechanics 1,77133,PSB,,
-Mathematics for Science Students 1,80125,PSB,,
+﻿name,number,faculties,campus,students,hall type
+Introduction to Computer Science,67101,"CS, CSM, CSE, CSP, CB, ST",none,none,none
+Discrete Mathematics,80181,"CS, ST, CSM, CSP, EE, M, CSP",none,none,none
+Linear Algebra 1,80134,"CS, CSM, CSE, M, CB",none,none,none
+Infinitesimal Calculus,80131,"CS, ST, CSM, M, CSE, CB",none,none,none
+General Chemistry For Biology  Students,69174,"CB, PSB",none,none,none
+Biologic Basic,72160,"CB, PSB",none,none,none
+21st Century Biology - Selected Topics A,76559,CB,none,none,none
+Mathematical Methods I,80114,"ST, CSP, EE",none,none,none
+Introduction to Economics 1,57107,CSE,none,none,none
+Linear algebra for engineering and science students 1,80153,EE,none,none,none
+Mechanics and Special Relativity for Engineering,83312,EE,none,none,none
+Introduction to Biology and Evolution of Organisms,72128,BC,none,none,none
+Introduction to Cell Biology,72153,BC,none,none,none
+Mathematics for Chemistry Students 1,80109,BC,none,none,none
+General Phys.- Mechanics For Chem. & Earth Students,77130,BC,none,none,none
+Mechanics 1,77133,PSB,none,none,none
+Mathematics for Science Students 1,80125,PSB,none,none,none

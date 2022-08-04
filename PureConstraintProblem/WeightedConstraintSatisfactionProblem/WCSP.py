@@ -37,8 +37,6 @@ class WCSP(CSP):
             if self.upper_bound_ is None or self.upper_bound_ > total_cost:
                 self.upper_bound_ = total_cost
                 self.best_assignment_ = assignment
-                print(assignment)
-                print(total_cost)
             if self.upper_bound_ == 0:
                 self.best_assignment_flag_ = True
             return

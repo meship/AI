@@ -10,6 +10,9 @@ class WCSPConstraint(Constraint):
         self.cost_ = cost
         self.is_satisfied_ = None
 
+    def get_type(self):
+        return self.type_
+
     def get_variables(self):
         return self.variables_
 

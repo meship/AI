@@ -126,7 +126,7 @@ class CSPExams(CSP):
         while not arcs_queue.empty():
             X_i, X_j = arcs_queue.get()
             if self.remove_inconsistent_values_(X_i, X_j):
-                X_i_neighbors = self.get_neighbors(X_i)
+                X_i_neighbors = self.get_neighbors_(X_i)
                 for neighbor in X_i_neighbors:
                     arcs_queue.put((neighbor, X_i))
 

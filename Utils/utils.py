@@ -86,27 +86,24 @@ def get_halls(given_data):
 # General functions
 
 
-def make_variables(change_periods_date):
-	course_data = pd.read_csv(PURE_CONSTRAINT_COURSE_DATABASE).iloc[:4, :]
+def make_variables(change_periods_date, n_courses=None):
+	if n_courses is not None:
+		course_data = pd.read_csv(PURE_CONSTRAINT_COURSE_DATABASE).iloc[:n_courses, :]
+	else:
+		course_data = pd.read_csv(PURE_CONSTRAINT_COURSE_DATABASE)
 
-	courses_list = list()
-	for index in course_data.index:
-		courses_list.append(Course(course_data[COURSE_ATTRIBUTES[0]][index] + ' - A',
-								   course_data[COURSE_ATTRIBUTES[1]][index],
-								   course_data[COURSE_ATTRIBUTES[2]][index],
-								   course_data[COURSE_ATTRIBUTES[3]][index],
-								   course_data[COURSE_ATTRIBUTES[4]][index],
-								   MOED_A,
-								   change_periods_date))
-
-		courses_list.append(Course(course_data[COURSE_ATTRIBUTES[0]][index] + ' - B',
-								   course_data[COURSE_ATTRIBUTES[1]][index],
-								   course_data[COURSE_ATTRIBUTES[2]][index],
-								   course_data[COURSE_ATTRIBUTES[3]][index],
-								   course_data[COURSE_ATTRIBUTES[4]][index],
-								   MOED_B,
-								   change_periods_date))
-	return courses_list
+	courses = list()
+	for moed in [(MOED_A, 'A'), (MOED_B, 'B')]:
+		for index in course_data.index:
+			courses.append(Course(course_data[COURSE_ATTRIBUTES[0]][index] + f' - {moed[1]}',
+								  course_data[COURSE_ATTRIBUTES[1]][index],
+								  course_data[COURSE_ATTRIBUTES[2]][index],
+								  course_data[COURSE_ATTRIBUTES[3]][index],
+								  course_data[COURSE_ATTRIBUTES[4]][index],
+								  course_data[COURSE_ATTRIBUTES[5]][index],
+								  moed[0],
+								  change_periods_date))
+	return courses
 
 
 def make_domain(start_date, end_date):

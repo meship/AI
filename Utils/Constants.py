@@ -26,7 +26,7 @@ MOED_B = 1
 ########### Pure Constraint Satisfaction Constants ##########
 #############################################################
 
-PURE_CONSTRAINT_COURSE_DATABASE = "../Data/Courses_Data.csv"
+PURE_CONSTRAINT_COURSE_DATABASE = "Data/Courses_Data.csv"
 PURE_CONSTRAINT_COURSE_DATABASE2 = "../Data/Courses_Data2.csv"
 COURSE_ATTRIBUTES = ['name', 'number', 'faculties', 'campus', 'students', 'hall type']
 CLASSROOMS_ATTRIBUTES = ['name', 'area', 'capacity', 'chair type', 'classroom type']
