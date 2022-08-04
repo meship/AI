@@ -64,9 +64,9 @@ if __name__ == '__main__':
     hours_dict = {MORNING_EXAM: (9, 0), NOON_EXAM: (13, 30), EVENING_EXAM: (17, 0)}
     if sys.argv[1] == SIMULATED_ANNEALING:
         print(SIMULATED_ANNEALING_MESSAGE)
-        solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict,
-                                          times_to_cols_dict, reverse_times_to_cols_dict, None,
-                                          number_to_real_date_dict, 0.85, cooling_function)
+        solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
+                                          times_to_cols_dict, reverse_times_to_cols_dict, {},
+                                          number_to_real_date_dict, 0.85, cooling_function, SA_MAX_ITER)
         solver.solve()
         print(solver.get_state())
         update_course_time_data(courses_to_rows_dict, solver.get_state().assignment_dict, reverse_times_to_cols_dict,
@@ -76,7 +76,7 @@ if __name__ == '__main__':
         print(GENETIC_ALGORITHM_MESSAGE)
         solver = GeneticAlgorithmSolver(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
                                         times_to_cols_dict, reverse_times_to_cols_dict, number_to_real_date_dict,
-                                        POPULATION_SIZE, 2)
+                                        POPULATION_SIZE, GENERATION_SIZE)
         solver.solve()
         print(solver.get_best_child())
         update_course_time_data(courses_to_rows_dict, solver.get_best_child().assignment_dict, reverse_times_to_cols_dict,
@@ -91,7 +91,7 @@ if __name__ == '__main__':
             complex_solver = GeneticAlgorithmSolver(n_courses, n_times, courses_to_rows_dict,
                                                     reverse_courses_dict, times_to_cols_dict,
                                                     reverse_times_to_cols_dict, number_to_real_date_dict,
-                                                    POPULATION_SIZE_COMPLEX, 300,
+                                                    POPULATION_SIZE_COMPLEX, GENERATION_SIZE_COMPLEX,
                                                     complex_problem=True, n_halls=n_halls,
                                                     halls_to_cols_dict=halls_to_cols_dict,
                                                     reverse_halls_to_col_dict=reverse_halls_to_col_dict,

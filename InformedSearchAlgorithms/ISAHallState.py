@@ -23,6 +23,7 @@ class ISAHallState:
             self.halls_assignment_dict = dict()  # mapping exam to class
             self.time_to_halls = dict()
             self.initialize_state()
+            a = 1
         else:
             self.halls_assignment_dict = halls_assignment_dict
             self.time_to_halls = time_to_halls_dict
@@ -82,18 +83,20 @@ class ISAHallState:
                                              replace=False)
             new_course_halls = self.set_operation(self.halls_assignment_dict[course_ind], halls_indices, [])
             for available_hall_ind in available_halls:
+                if self.reverse_courses_dict[course_ind].get_hall_type() != \
+                        self.reverse_halls_dict[available_hall_ind].get_hall_type():
+                    continue
                 new_course_halls.append(available_hall_ind)
-                if self.is_legal_hall_addition(course_ind, new_course_halls, available_hall_ind):
+                if self.is_sufficient_hall_addition(course_ind, new_course_halls, available_hall_ind):
+                    if self.reverse_courses_dict[course_ind].get_number() == 67925:
+                        print(f"Unary move: NAND: {self.reverse_halls_dict[available_hall_ind]}")
                     legal_assignment = True
                     break
             if legal_assignment:
                 self.update_new_halls_assignment(course_ind, course_time, new_course_halls, halls_indices)
             try_ind += 1
 
-    def is_legal_hall_addition(self, course_ind, course_halls, new_hall_ind):
-        if self.reverse_courses_dict[course_ind].get_hall_type() != \
-                self.reverse_halls_dict[new_hall_ind].get_hall_type():
-            return False
+    def is_sufficient_hall_addition(self, course_ind, course_halls, new_hall_ind):
         new_capacity = sum([self.reverse_halls_dict[hall].get_capacity() for hall in course_halls])
         if new_capacity < self.reverse_courses_dict[course_ind].get_n_students():
             return False
@@ -108,6 +111,8 @@ class ISAHallState:
         possible_friend_courses = list(filter(lambda x: self.reverse_courses_dict[x].get_hall_type() ==
                                                         self.reverse_courses_dict[course_ind].get_hall_type(),
                                               range(self.n_courses)))
+        if self.reverse_courses_dict[course_ind].get_number() == 67925:
+            a = 3
         possible_friend_courses.remove(course_ind)
         legal_swap = False
         try_ind = 0
@@ -124,6 +129,8 @@ class ISAHallState:
             friend_new_indices = self.set_operation(self.halls_assignment_dict[friend_course], friend_indices_to_switch,
                                                     indices_to_switch)
             if self.check_legal_swap(course_ind, friend_course, my_new_indices, friend_new_indices):
+                if self.reverse_courses_dict[course_ind].get_number() == 67925:
+                    print(f"Binary move NAND: {[self.reverse_halls_dict[new_ind] for new_ind in my_new_indices]}")
                 self.apply_binary_action(course_ind, course_time, indices_to_switch, my_new_indices,
                                          friend_course, friend_indices_to_switch, friend_new_indices)
                 legal_swap = True

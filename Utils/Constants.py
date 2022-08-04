@@ -132,8 +132,11 @@ SIMULATED_ANNEALING = "sa"
 GENETIC_ALGORITHM = "ga"
 SIMULATED_ANNEALING_MESSAGE = "Chosen algorithm is Simulated Annealing"
 GENETIC_ALGORITHM_MESSAGE = "Chosen algorithm is Genetic Algorithm"
+SA_MAX_ITER = 5000
 POPULATION_SIZE = 92
 POPULATION_SIZE_COMPLEX = 62
+GENERATION_SIZE = 2
+GENERATION_SIZE_COMPLEX = 300
 #############################################################
 ################ Extended problem ###########################
 #############################################################
