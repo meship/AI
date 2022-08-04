@@ -52,12 +52,36 @@ class GeneticAlgorithmSolver:
 
     def check_hall_solution_quality(self):
         print("Results: ")
-        print(f"Number of unfair assignments with differyent chair types: {self.best_child.unfair_assignment()}")
-        average_ratio = list()
-        for time_slot in range(self.best_child.n_times):
-            if time_slot not in self.best_child.time_to_halls.keys():
-                continue
-            average_ratio.append(sum([1 if self.best_child.reverse_halls_dict[hall].get_chair_type() == 's'
-                                     else 0 for hall in self.best_child.time_to_halls[time_slot]]))
-        print(f"General ratio between halls assigned with type s to the whole assignment: {np.mean(average_ratio)}")
-        print(f"Distance: {self.best_child.far_locations()[1]}")
+        print(f"Number of unfair assignments with different chair types: ")
+        for course, halls in self.best_child.halls_assignment_dict.items():
+            r, s = 0, 0
+            for hall_ind in halls:
+                if self.best_child.reverse_halls_dict[hall_ind].get_chair_type() == "s":
+                    s += 1
+                elif self.best_child.reverse_halls_dict[hall_ind].get_chair_type() == "r":
+                    r += 1
+                else:
+                    break
+            else:
+                unfair_assignment = min(r, s)
+                if unfair_assignment:
+                    print(f"{self.best_child.reverse_courses_dict[course]}: student: {s}, regular: {r}")
+        total_halls_assigned = 0
+        student_chair_halls = 0
+        for course, halls in self.best_child.halls_assignment_dict.items():
+            total_halls_assigned += len(halls)
+            for hall_ind in halls:
+                if self.best_child.reverse_halls_dict[hall_ind].get_chair_type() == "s":
+                    student_chair_halls += 1
+        print(f"\nNumber of halls with student chairs assigned {student_chair_halls} out of {total_halls_assigned} halls")
+        print(f"\nRatio number between halls capacity assigned and exam number of students: ")
+        for course, halls, in self.best_child.halls_assignment_dict.items():
+            capacity = sum([self.best_child.reverse_halls_dict[hall].get_capacity() for hall in halls])
+            ratio = capacity/self.best_child.reverse_courses_dict[course].get_n_students()
+            if ratio > SQUEEZE_RATIO:
+                print(f"{self.best_child.reverse_courses_dict[course]}: {ratio}")
+        print("\nAreas of each course assigned: ")
+        for course, halls in self.best_child.halls_assignment_dict.items():
+            print(f"{self.best_child.reverse_courses_dict[course]}: "
+                  f"{[self.best_child.reverse_halls_dict[hall].get_area() for hall in halls]}")
+        # print(f"Distance: {self.best_child.far_locations()[1]}")

@@ -126,16 +126,11 @@ class GeneticAlgorithmComplexGeneration:
             for course_ind in chosen_courses_ind:
                 # make the mutate
                 # child.apply_try_move(course_ind, child.time_assignment_dict[course_ind])
-                move = np.random.choice([0, 1, ADD_HALL, REMOVE_HALL],
-                                        p=[0.5, 0.5, 0, 0])
-                if move == 0:
-                    child.apply_hall_unary_move(course_ind, child.time_assignment_dict[course_ind])
-                elif move == 1:
-                    child.apply_hall_binary_move(course_ind, child.time_assignment_dict[course_ind])
-                elif move == ADD_HALL:
-                    child.apply_hall_add_move(course_ind, child.time_assignment_dict[course_ind])
+                move = np.random.choice([UNARY_HALL_MOVE, BINARY_HALL_MOVE])
+                if move == UNARY_HALL_MOVE:
+                    child.unary_move(course_ind, child.time_assignment_dict[course_ind])
                 else:
-                    child.apply_hall_remove_move(course_ind, child.time_assignment_dict[course_ind])
+                    child.binary_move(course_ind, child.time_assignment_dict[course_ind])
         return child
 
 

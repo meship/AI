@@ -1,9 +1,11 @@
 import itertools
 import math
 import copy
+import random
 
 from Utils.Constants import *
 from Utils.utils import update_dict
+
 
 class ISAHallState:
     def __init__(self, n_courses, n_times, n_halls, courses_to_rows_dict, reverse_courses_dict, halls_to_cols_dict,
@@ -25,7 +27,6 @@ class ISAHallState:
             self.halls_assignment_dict = halls_assignment_dict
             self.time_to_halls = time_to_halls_dict
 
-
     def initialize_state(self):
         n_courses_assigned = 0
         available_moed_a_courses = np.array(range(self.n_courses // 2))
@@ -42,9 +43,7 @@ class ISAHallState:
             moed_a_ind = np.argwhere(available_moed_a_courses == current_moed_a)
             available_moed_a_courses = np.delete(available_moed_a_courses, moed_a_ind)
             n_courses_assigned += 1
-        # self.time_to_halls = unavailable_halls_dict.copy()
         # return 1 #todo: think more
-        a=1
 
     def make_halls_dict(self):
         for day_time in range(self.n_times):
@@ -65,171 +64,101 @@ class ISAHallState:
         while self.reverse_courses_dict[course_ind].get_hall_type() != \
                 self.reverse_halls_dict[hall_idx].get_hall_type():
             hall_idx = np.random.choice(np.array(list(set(range(self.n_halls)) - set(self.time_to_halls[time_sloth]))))
-            # print(f"new hall index {hall_idx}")
-            # print(unavailable_halls[time_sloth])
-        # unavailable_halls[time_sloth].append(hall_idx)
         update_dict(time_sloth, hall_idx, self.time_to_halls)
         return hall_idx
 
-    # def generate_successor(self):
-    #     successor_state = self.__copy__()
-    #     # Generate all legal moves
-    #     for course_ind in range(self.n_courses):
-    #         time_ind = successor_state.time_assignment_dict[course_ind]
-    #         action_to_apply = np.random.choice(a=[UNARY_PERIODS_MOVE, BINARY_MOVE, ADD_HALL, REMOVE_HALL], size=1, replace=True,
-    #                                            p=np.array([0.1, 0.7, 0.1, 0.1])) #todo: maybe add another move - stay in place
-    #         if action_to_apply == UNARY_PERIODS_MOVE:
-    #             successor_state.apply_hall_unary_move(course_ind, time_ind)
-    #         elif action_to_apply == BINARY_MOVE:
-    #             successor_state.apply_hall_binary_move(course_ind, time_ind)
-    #         elif action_to_apply == ADD_HALL:
-    #             successor_state.apply_hall_add_move(course_ind, time_ind)
-    #         else:
-    #             successor_state.apply_hall_remove_move(course_ind, time_ind)
-    #
-    #     return successor_state
+    def set_operation(self, base, list_to_remove, list_to_add):
+        return list((set(base) - set(list_to_remove)).union(set(list_to_add)))
 
-    def apply_try_move(self, course_row, course_col):
-        r = 0
-        s = 0
-        r_hall, s_hall = [], []
-        for hall in self.halls_assignment_dict[course_row]:
-            if self.reverse_halls_dict[hall].get_hall_type == 'r':
-                r += 1
-                r_hall.append(hall)
-            else:
-                s += 1
-                s_hall.append(hall)
-        if not r_hall or not s_hall:
-            return
-        available_halls = list(set(range(self.n_halls)) - set(self.time_to_halls[course_col]))
-        if r > s:
-            new_list = []
-            for hall in available_halls:
-                if self.reverse_halls_dict[hall].get_hall_type() == 'r':
-                    new_list.append(hall)
-            chosen_hall = np.random.choice(new_list)
-            hall_to_replace = np.random.choice(s_hall)
-        else:
-            new_list = []
-            for hall in available_halls:
-                if self.reverse_halls_dict[hall].get_hall_type() == 's':
-                    new_list.append(hall)
-            chosen_hall = np.random.choice(new_list)
-            hall_to_replace = np.random.choice(r_hall)
-        move = HallUnaryMove(course_row, course_col, hall_to_replace, chosen_hall, UNARY_HALL_MOVE)
-        if self.check_hall_unary_legal_move(move):
-            self.apply_move(move)
-
-
-    def apply_hall_unary_move(self, course_row, course_col):
-        number_of_halls = (math.ceil((1/3) * len(self.halls_assignment_dict[course_row])))
-        available_halls = list(set(range(self.n_halls)) - set(self.time_to_halls[course_col]))
-        halls_to_move = np.random.choice(self.halls_assignment_dict[course_row], number_of_halls, replace=False)
-        for chosen_hall in halls_to_move:
-            for try_ind in range(1, N_TRIES + 1):
-                # chosen_hall = np.random.choice(self.halls_assignment_dict[course_row])
-                hall_to_switch = np.random.choice(available_halls)
-                move = HallUnaryMove(course_row, course_col, chosen_hall, hall_to_switch, UNARY_HALL_MOVE) #todo: add constants
-                if self.check_hall_unary_legal_move(move):
-                    self.apply_move(move)
+    def unary_move(self, course_ind, course_time):
+        halls_len = len(self.halls_assignment_dict[course_ind])
+        legal_assignment = False
+        try_ind = 0
+        while not legal_assignment and try_ind < N_TRIES:
+            available_halls = self.set_operation(range(self.n_halls), self.time_to_halls[course_time], [])
+            random.shuffle(available_halls)
+            amount_of_halls = np.random.choice(range(halls_len // 3, (halls_len // 2) + 1))
+            halls_indices = np.random.choice(a=self.halls_assignment_dict[course_ind], size=amount_of_halls,
+                                             replace=False)
+            new_course_halls = self.set_operation(self.halls_assignment_dict[course_ind], halls_indices, [])
+            for available_hall_ind in available_halls:
+                new_course_halls.append(available_hall_ind)
+                if self.is_legal_hall_addition(course_ind, new_course_halls, available_hall_ind):
+                    legal_assignment = True
                     break
+            if legal_assignment:
+                self.update_new_halls_assignment(course_ind, course_time, new_course_halls, halls_indices)
+            try_ind += 1
 
-    def apply_hall_remove_move(self, course_row, course_col):
-        for try_ind in range(len(self.halls_assignment_dict[course_row])):
-            hall_to_remove = np.random.choice(self.halls_assignment_dict[course_row])
-            updated_capacity = 0
-            for hall in self.halls_assignment_dict[course_row]:
-                if hall != hall_to_remove:
-                    updated_capacity += self.reverse_halls_dict[hall].get_capacity()
-            if updated_capacity >= self.reverse_courses_dict[course_row].get_n_students():
-                self.halls_assignment_dict[course_row].remove(hall_to_remove)
-                self.time_to_halls[course_col].remove(hall_to_remove)
-                return
-
-
-    def apply_hall_binary_move(self, course_row, course_col):
-        friend_row = np.random.choice(range(self.n_courses))
-        while course_row == friend_row:
-            friend_row = np.random.choice(range(self.n_courses))
-
-        chosen_hall = np.random.choice(self.halls_assignment_dict[course_row])
-        hall_to_switch = np.random.choice(self.halls_assignment_dict[friend_row])
-
-        move = HallBinaryMove(course_row, course_col, chosen_hall, friend_row, self.time_assignment_dict[friend_row],
-                          hall_to_switch, BINARY_HALL_MOVE)
-
-        if self.check_binary_legal_move(move):
-            self.apply_move(move)
-
-    def apply_hall_add_move(self, course_row, course_col):
-        for try_ind in range(1, N_TRIES + 1):
-            available_halls = list(set(range(self.n_halls)) - set(self.time_to_halls[course_col]))
-            hall_to_add = np.random.choice(available_halls)
-            if self.reverse_halls_dict[hall_to_add].get_hall_type() == self.reverse_courses_dict[course_row].get_hall_type():
-                update_dict(course_row, hall_to_add, self.halls_assignment_dict)
-                update_dict(course_col, hall_to_add, self.time_to_halls)
-                return
-
-    def check_hall_unary_legal_move(self, move):
-        # Check whether we are in the proper bounds
-        if move.new_hall < 0 or move.new_hall >= self.n_halls:
+    def is_legal_hall_addition(self, course_ind, course_halls, new_hall_ind):
+        if self.reverse_courses_dict[course_ind].get_hall_type() != \
+                self.reverse_halls_dict[new_hall_ind].get_hall_type():
             return False
-        # Check whether the hard constraint between 2 attempts remains satisfied
-        elif not self.check_legal_transfer(move.course_row, move.course_time, move.new_hall):
+        new_capacity = sum([self.reverse_halls_dict[hall].get_capacity() for hall in course_halls])
+        if new_capacity < self.reverse_courses_dict[course_ind].get_n_students():
             return False
         return True
 
+    def update_new_halls_assignment(self, course_ind, course_time, halls_to_add, halls_to_remove):
+        self.halls_assignment_dict[course_ind] = halls_to_add.copy()
+        self.time_to_halls[course_time] = self.set_operation(self.time_to_halls[course_time], halls_to_remove,
+                                                             halls_to_add)
 
-    def check_binary_legal_move(self, move):
-        if not self.check_legal_transfer(move.first_row, move.first_col, move.second_hall):
+    def binary_move(self, course_ind, course_time):
+        possible_friend_courses = list(filter(lambda x: self.reverse_courses_dict[x].get_hall_type() ==
+                                                        self.reverse_courses_dict[course_ind].get_hall_type(),
+                                              range(self.n_courses)))
+        possible_friend_courses.remove(course_ind)
+        legal_swap = False
+        try_ind = 0
+        while not legal_swap and try_ind < N_TRIES:
+            friend_course = np.random.choice(possible_friend_courses)
+            max_amount = min(len(self.halls_assignment_dict[course_ind]), len(self.halls_assignment_dict[friend_course]))
+            amount_to_switch = np.random.choice(max_amount)
+            indices_to_switch = np.random.choice(a=self.halls_assignment_dict[course_ind], size=amount_to_switch,
+                                                 replace=False)
+            friend_indices_to_switch = np.random.choice(a=self.halls_assignment_dict[friend_course],
+                                                        size=amount_to_switch, replace=False)
+            my_new_indices = self.set_operation(self.halls_assignment_dict[course_ind], indices_to_switch,
+                                                friend_indices_to_switch)
+            friend_new_indices = self.set_operation(self.halls_assignment_dict[friend_course], friend_indices_to_switch,
+                                                    indices_to_switch)
+            if self.check_legal_swap(course_ind, friend_course, my_new_indices, friend_new_indices):
+                self.apply_binary_action(course_ind, course_time, indices_to_switch, my_new_indices,
+                                         friend_course, friend_indices_to_switch, friend_new_indices)
+                legal_swap = True
+            try_ind += 1
+
+    def check_legal_swap(self, course_ind, friend_course, my_new_indices, friend_new_indices):
+        course_time = self.time_assignment_dict[course_ind]
+        for hall_ind in my_new_indices:
+            if hall_ind in self.time_to_halls[course_time] and hall_ind not in self.halls_assignment_dict[course_ind]:
+                return False
+        friend_time = self.time_assignment_dict[friend_course]
+        for hall_ind in friend_new_indices:
+            if hall_ind in self.time_to_halls[friend_time] and hall_ind not in self.halls_assignment_dict[friend_course]:
+                return False
+        new_capacity = sum([self.reverse_halls_dict[hall].get_capacity() for hall in my_new_indices])
+        if new_capacity < self.reverse_courses_dict[course_ind].get_n_students():
             return False
-        if not self.check_legal_transfer(move.second_row, move.second_col, move.first_hall):
+        new_capacity = sum([self.reverse_halls_dict[hall].get_capacity() for hall in friend_new_indices])
+        if new_capacity < self.reverse_courses_dict[friend_course].get_n_students():
             return False
         return True
 
-
-    def check_legal_transfer(self, course_ind, course_time, new_hall):
-        # check capacity
-        space_in_halls = 0
-        for hall in self.halls_assignment_dict[course_ind]:
-            space_in_halls += self.reverse_halls_dict[hall].get_capacity()
-        if space_in_halls < self.reverse_courses_dict[course_ind].get_n_students():
-            return False
-        # check that each hall holds no more than one exam in each time slot
-        if new_hall in self.time_to_halls[course_time]:
-            return False
-        # check if the course needs more than 1 halls, that all halls are different from each other
-        if new_hall in self.halls_assignment_dict[course_ind]:
-            return False
-        # check that if the course needs a computer type
-        if self.reverse_courses_dict[course_ind].get_hall_type() != self.reverse_halls_dict[new_hall].get_hall_type():
-            return False
-        return True
-
-
-    def apply_move(self, move):
-        if move.type == UNARY_HALL_MOVE:
-            self.halls_assignment_dict[move.course_row].remove(move.old_hall)
-            update_dict(move.course_row, move.new_hall, self.halls_assignment_dict)
-            self.time_to_halls[move.course_time].remove(move.old_hall)
-            update_dict(move.course_time, move.new_hall, self.time_to_halls)
-        else:
-            self.halls_assignment_dict[move.first_row].remove(move.first_hall)
-            update_dict(move.first_row, move.second_hall, self.halls_assignment_dict)
-            self.time_to_halls[move.first_col].remove(move.first_hall)
-            update_dict(move.first_col, move.second_hall, self.time_to_halls)
-
-            self.halls_assignment_dict[move.second_row].remove(move.second_hall)
-            update_dict(move.second_row, move.first_hall, self.halls_assignment_dict)
-            self.time_to_halls[move.second_col].remove(move.second_hall)
-            update_dict(move.second_col, move.first_hall, self.time_to_halls)
-
+    def apply_binary_action(self, course_ind, course_time, indices_to_switch, my_new_indices, friend_course,
+                            friend_indices_to_switch, friend_new_indices):
+        self.halls_assignment_dict[course_ind] = my_new_indices.copy()
+        self.halls_assignment_dict[friend_course] = friend_new_indices.copy()
+        self.time_to_halls[course_time] = self.set_operation(self.time_to_halls[course_time], indices_to_switch,
+                                                             friend_indices_to_switch)
+        friend_time = self.time_assignment_dict[friend_course]
+        self.time_to_halls[friend_time] = self.set_operation(self.time_to_halls[friend_time], friend_indices_to_switch,
+                                                             indices_to_switch)
 
     def get_value(self):
-        # value_to_return = self.unfair_assignment()  + self.uncomfortable_assignment() + self.far_locations()[0]
-        value_to_return = self.unfair_assignment() + self.squeeze()
-        # maybe check difference between needed space to chosen hall space
+        value_to_return = self.unfair_assignment() + self.squeeze() + self.uncomfortable_assignment() + \
+                          1.5 * self.far_locations()
         print(value_to_return)
         return value_to_return
 
@@ -246,11 +175,7 @@ class ISAHallState:
                     r += 1
                 else:
                     s += 1
-            value += min(r,s)
-            # type_array = np.array(list(map(lambda x:self.reverse_halls_dict[x].get_chair_type(), halls)))
-            # if np.unique(type_array).shape[0] == 2:
-            #     value += 1
-        print(f"value is:{value}")
+            value += min(r, s) / (r + s)
         return value
 
     def uncomfortable_assignment(self):
@@ -259,19 +184,18 @@ class ISAHallState:
         for course_ind, halls in self.halls_assignment_dict.items():
             if self.reverse_courses_dict[course_ind].get_hall_type() == 'c':
                 continue
-            count += sum([1 if self.reverse_halls_dict[hall].get_chair_type() == 's' else 0 for hall in halls])
+            count += (sum([1 if self.reverse_halls_dict[hall].get_chair_type() == 's' else 0 for hall in halls])) / \
+                     len(halls)
         return count
 
     def far_locations(self):
         # close hall to same exam
         count = 0
-        quality_check = []
         for halls in self.halls_assignment_dict.values():
             area_array = np.array([self.reverse_halls_dict[hall].get_area() for hall in halls])
-            cal = np.sum(np.abs(area_array-np.median(area_array)))
+            cal = np.mean(np.abs(area_array-np.median(area_array))) / np.max(area_array)
             count += cal
-            quality_check.append(cal)
-        return count, quality_check
+        return count
 
     def squeeze(self):
         val = 0
@@ -279,7 +203,7 @@ class ISAHallState:
             places = 0
             for hall in halls:
                 places += self.reverse_halls_dict[hall].get_capacity()
-            if places/self.reverse_courses_dict[course].get_n_students() > 1.25:
+            if places/self.reverse_courses_dict[course].get_n_students() > SQUEEZE_RATIO:
                 val += 1
         return val
 
@@ -302,37 +226,8 @@ class ISAHallState:
         return repr_val
 
     def __eq__(self, other):
-        eq_count = 0
         for course_ind in self.halls_assignment_dict.keys():
             if set(self.halls_assignment_dict[course_ind]).intersection(set(other.halls_assignment_dict[course_ind])):
                 return False
         return True
-
-
-class HallUnaryMove:
-
-    def __init__(self, course_row, course_time, old_hall, new_hall, move_type):
-        self.course_row = course_row
-        self.course_time = course_time
-        self.old_hall = old_hall
-        self.new_hall = new_hall
-        self.type = move_type # Determines whether the move is between periods or days
-
-    # def __str__(self):
-    #     return f"({self.old_row, self.old_col} -> {self.new_row, self.new_col})"
-
-
-class HallBinaryMove:
-
-    def __init__(self, first_row, first_col, first_hall, second_row, second_col, second_hall, move_type):
-        self.first_row = first_row
-        self.first_col = first_col
-        self.first_hall = first_hall
-        self.second_row = second_row
-        self.second_col = second_col
-        self.second_hall = second_hall
-        self.type = move_type # Binary move type
-    #
-    # def __str__(self):
-    #     return f"({self.first_row, self.first_col} <-> {self.second_row, self.second_col})"
 

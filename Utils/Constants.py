@@ -104,10 +104,10 @@ PSB_EXAM_DIFFERENCE_B = 3
 CSC_EXAM_DIFFERENCE_B = 3
 
 # Simulated Annealing
-ISA_COURSE_DATABASE = "../Data/Courses_Data.csv"
-ISA_COURSE_DATABASE2 = "../Data/Courses_Data2.csv"
-ISA_COURSE_DATABASE3 = "../Data/Courses_Data3.csv"
-ISA_CLASSROOMS_DATABASE = "../Data/Classrom_Data.csv"
+ISA_COURSE_DATABASE = "Data/Courses_Data.csv"
+ISA_COURSE_DATABASE2 = "Data/Courses_Data2.csv"
+ISA_COURSE_DATABASE3 = "Data/Courses_Data3.csv"
+ISA_CLASSROOMS_DATABASE = "Data/Classrom_Data.csv"
 UNARY_PERIODS_MOVE = 0
 UNARY_MOVE_FORWARD = 1
 UNARY_MOVE_BACKWARD = -1
@@ -140,6 +140,7 @@ POPULATION_SIZE_COMPLEX = 62
 UNARY_HALL_MOVE = 0
 BINARY_HALL_MOVE = 1
 CONTINUE_TO_COMPLEX_MESSAGE = "Do you wish to assign halls as well? y/n\n"
+SQUEEZE_RATIO = 1.25
 
 #############################################################
 ######################## Utils ##############################
