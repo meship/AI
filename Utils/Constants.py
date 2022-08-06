@@ -117,6 +117,7 @@ ADD_HALL = 3
 REMOVE_HALL = 4
 ATTEMPTS_DIFF = 12
 N_TRIES = 250
+ALPHA = 0.85
 
 # Genetic Algorithms
 N_ATTEMPTS_TO_REPRODUCE = 100
@@ -132,11 +133,11 @@ SIMULATED_ANNEALING = "sa"
 GENETIC_ALGORITHM = "ga"
 SIMULATED_ANNEALING_MESSAGE = "Chosen algorithm is Simulated Annealing"
 GENETIC_ALGORITHM_MESSAGE = "Chosen algorithm is Genetic Algorithm"
-SA_MAX_ITER = 5000
+SA_MAX_ITER = 3000
 POPULATION_SIZE = 92
 POPULATION_SIZE_COMPLEX = 62
-GENERATION_SIZE = 2
-GENERATION_SIZE_COMPLEX = 300
+GENERATION_SIZE = 4
+GENERATION_SIZE_COMPLEX = 4
 #############################################################
 ################ Extended problem ###########################
 #############################################################
