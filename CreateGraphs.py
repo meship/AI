@@ -53,14 +53,22 @@ def create_ga_graphs(course_num=None):
         layout=go.Layout(title=f"GA Average and Best as a Function of Gen Number in courses",
                          xaxis=dict(title=r"generation number"),
                          yaxis=dict(title=r"fitness value")))
-    # fig.show()
+    fig.show()
 
     diff_dict, evening_exams = solver.check_solution_quality(True)
-    fig = go.Figure(
-        data=[go.Scatter(x=list(diff_dict.keys()), y=list(diff_dict.values()), mode='markers')],
-        layout=go.Layout(title=f"Deviations from requested difference",
-                         xaxis=dict(title=r"courses"),
-                         yaxis=dict(title=r"days")))
+
+    traces = {}
+    for courses, difference in diff_dict.items():
+        traces[f"{courses[0]}, {courses[1]}"] = go.Box(name=f"{courses[0]}, {courses[1]}", y=[difference],
+                                        boxpoints='all',
+                                        pointpos=0,
+                                        marker=dict(color='rgb(84, 173, 39)'),
+                                        line=dict(color='rgba(0,0,0,0)'),
+                                        fillcolor='rgba(0,0,0,0)',
+                                        showlegend=False)
+    # convert data to form required by plotly
+    data = list(traces.values())
+    fig = go.Figure(data)
     fig.show()
 
     fig = px.pie(values=[evening_exams, (n_courses - evening_exams)],
@@ -75,23 +83,23 @@ def create_ga_graphs(course_num=None):
         layout=go.Layout(title=f"GA Average and Best as a Function of Gen Number in halls",
                          xaxis=dict(title=r"generation number"),
                          yaxis=dict(title=r"fitness value")))
-    # fig.show()
+    fig.show()
 
     course_to_unfair_assignment, num_of_unfair_courses, student_chair_halls, n_halls, course_to_areas_dict = \
         complex_solver.check_hall_solution_quality(True)
     for course, unfair_assignment in course_to_unfair_assignment.items():
         fig = px.pie(values=list(unfair_assignment), names=['students_chairs','regulars_chairs'],
                      title=f"{course}")
-        # fig.show()
+        fig.show()
     fig = px.pie(values=[num_of_unfair_courses, (n_courses - num_of_unfair_courses)],
                  names=['students_chairs','regulars_chairs'],
                      title=f"Number of Unfair Exams")
-    # fig.show()
+    fig.show()
 
     fig = px.pie(values=[student_chair_halls, (n_halls - student_chair_halls)],
                  names=['students_chairs_halls', 'regulars_chairs_halls'],
                  title=f"Number of Halls with Students Chairs")
-    # fig.show()
+    fig.show()
 
     traces = {}
     for course, areas in course_to_areas_dict.items():
@@ -106,7 +114,7 @@ def create_ga_graphs(course_num=None):
 
     # build figure
     fig = go.Figure(data)
-    # fig.show()
+    fig.show()
 
 
 
@@ -143,7 +151,6 @@ def create_sa_graphs(course_num=None):
     fig.show()
 
 
-
 if __name__ == '__main__':
     domain, number_to_real_date_dict = make_domain(sys.argv[-2], sys.argv[-1])
     change_periods_date = int(MOED_A_RATIO * len(domain))
@@ -153,7 +160,7 @@ if __name__ == '__main__':
     elif sys.argv[1] == CHOICE_WCSP:
         create_pure_constraint_problem_graphs(8, solve_WCSP, "WCSP")
     elif sys.argv[1] == GENETIC_ALGORITHM:
-        create_ga_graphs(8)
+        create_ga_graphs()
     elif sys.argv[1] == SIMULATED_ANNEALING:
         create_sa_graphs()
 

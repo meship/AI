@@ -136,8 +136,8 @@ GENETIC_ALGORITHM_MESSAGE = "Chosen algorithm is Genetic Algorithm"
 SA_MAX_ITER = 3000
 POPULATION_SIZE = 92
 POPULATION_SIZE_COMPLEX = 62
-GENERATION_SIZE = 4
-GENERATION_SIZE_COMPLEX = 4
+GENERATION_SIZE = 300
+GENERATION_SIZE_COMPLEX = 300
 #############################################################
 ################ Extended problem ###########################
 #############################################################
