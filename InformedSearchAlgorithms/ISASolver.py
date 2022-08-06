@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from google_auth_oauthlib.flow import InstalledAppFlow
+# from google_auth_oauthlib.flow import InstalledAppFlow
 
 from Utils.utils import export_to_calendar
 
@@ -116,9 +116,10 @@ def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 	# scopes = ["https://www.googleapis.com/auth/calendar"]
 	# flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=scopes)
 	# flow.run_console()
-
-	return solver, complex_solver
-
+	if answer == 'y':
+		return solver, complex_solver
+	else:
+		return solver, None
 
 if __name__ == '__main__':
 	# argv[0] = kind, argv[1 + 2] = '2022/01/15', '2022/03/08'
