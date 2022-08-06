@@ -54,6 +54,21 @@ def create_ga_graphs(course_num=None):
                          xaxis=dict(title=r"generation number"),
                          yaxis=dict(title=r"fitness value")))
     # fig.show()
+
+    diff_dict, evening_exams = solver.check_solution_quality(True)
+    fig = go.Figure(
+        data=[go.Scatter(x=list(diff_dict.keys()), y=list(diff_dict.values()), mode='markers')],
+        layout=go.Layout(title=f"Deviations from requested difference",
+                         xaxis=dict(title=r"courses"),
+                         yaxis=dict(title=r"days")))
+    fig.show()
+
+    fig = px.pie(values=[evening_exams, (n_courses - evening_exams)],
+                 names=['evening exams','not evening exams'],
+                     title=f"Number of Evening Exams")
+    fig.show()
+
+
     fig = go.Figure(
         data=[go.Scatter(x=np.arange(len(average_halls_values)), y=average_halls_values, mode='markers + lines'),
               go.Scatter(x=np.arange(len(best_halls_values)), y=best_halls_values, mode='markers + lines')],
@@ -91,7 +106,7 @@ def create_ga_graphs(course_num=None):
 
     # build figure
     fig = go.Figure(data)
-    fig.show()
+    # fig.show()
 
 
 
