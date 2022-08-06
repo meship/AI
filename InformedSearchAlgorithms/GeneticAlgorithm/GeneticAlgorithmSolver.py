@@ -53,17 +53,25 @@ class GeneticAlgorithmSolver:
     def get_best_child(self):
         return self.best_child
 
-    def check_solution_quality(self):
-        print("Results: ")
-        print(f"Duplicate status: {self.best_child.check_duplicates()}")
-        print(f"Difference status: ")
+    def check_solution_quality(self, export_to_graph=False):
+        to_print = "Results: \n"
+        # to_print += f"Duplicate status: {self.best_child.check_duplicates()}")
+        to_print += f"Difference status: \n"
         diff_results = self.best_child.check_exams_diff()
+        diff_results_to_graph = dict()
         for pair, diff in diff_results.items():
-            print(f"({pair[0]}, {pair[1]}): {diff}")
-        print(f"Number of Friday exams: {self.best_child.exam_on_friday_constraint()}")
-        print(f"Number of Sunday morning exams: {self.best_child.exam_on_sunday_morning_constraint()}")
-        print(f"Number of evening exams: {self.best_child.exam_on_evening_constraint()}")
-        print(f"Number of Math NOT morning exams: {self.best_child.math_exam_on_morning_constraint()}")
+            to_print += f"({pair[0]}, {pair[1]}): {diff}\n"
+            if pair[0].get_name() != pair[1].get_name():
+                diff_results_to_graph[pair[0].get_name(), pair[1].get_name()] = diff
+        to_print += f"Number of Friday exams: {self.best_child.exam_on_friday_constraint()}\n"
+        to_print += f"Number of Sunday morning exams: {self.best_child.exam_on_sunday_morning_constraint()}\n"
+        to_print += f"Number of evening exams: {self.best_child.exam_on_evening_constraint()}\n"
+        to_print += f"Number of Math NOT morning exams: {self.best_child.math_exam_on_morning_constraint()}\n"
+
+        if not export_to_graph:
+            print(to_print)
+        else:
+            return diff_results_to_graph, self.best_child.exam_on_evening_constraint()
 
     def check_hall_solution_quality(self, export_to_graph=False):
 
