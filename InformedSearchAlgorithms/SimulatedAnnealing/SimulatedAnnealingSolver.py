@@ -30,10 +30,10 @@ class SimulatedAnnealingSolver:
             delta = next_state.get_value() - self.state_.get_value()
             if delta < 0:
                 self.state_ = next_state
-            else:
-                val = random.uniform(0, 1)
-                if val < np.exp(-delta/temperature):
-                    self.state_ = next_state
+            # else:
+            #     val = random.uniform(0, 1)
+            #     if val < np.exp(-delta/temperature):
+            #         self.state_ = next_state
             temperature = self.cooling_function_(self.initial_temperature_, self.alpha_, t)
 
     def get_state(self):
