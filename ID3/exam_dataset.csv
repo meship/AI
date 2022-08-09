@@ -1,0 +1,10 @@
+﻿id,did fail,exam grade,final grade,did moed b before,improve moed b before,confident in improvement,time to study,exam difficulty,exam type 1,exam type 2,factor in moed a,harder then moed a,decision
+209489327,no,55-69,60-69,no,no,yes,7+,hard,open,write,no,don’t know,y
+209489327,no,55-69,60-69,yes,yes,don’t know,7+,hard,semi open ,write,yes,no,y
+209489327,no,55-69,80-89,yes,yes,no,7+,hard,semi close,comp,no,don’t know,n
+209489327,no,55-69,70-79,yes,yes,yes,7+,hard,open,write,no,yes,y
+209489327,no,55-69,70-79,yes,yes,no,7+,hard,close,comp,no,yes,n
+208725010,no,55-69,70-79,no,no,no,7+,hard,open,write,no,no,n
+209489327,no,70-79,90-100,yes,yes,yes,7+,hard,close,write,yes,no,n
+208725010,yes,54-,59-,no,no,no,7+,medium,open,write,yes,don’t know,y
+209489327,yes,54-,59-,yes,yes,don’t know,3,medium,close,comp,no,yes,y
