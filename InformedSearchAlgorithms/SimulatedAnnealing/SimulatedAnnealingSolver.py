@@ -24,6 +24,7 @@ class SimulatedAnnealingSolver:
             if self.callback:
                 self.callback(self.state_.get_value(), temperature)
             if temperature == 0:
+                print("here!!!!!!!!!!")
                 return
             next_state = self.state_.generate_successor()
             delta = next_state.get_value() - self.state_.get_value()

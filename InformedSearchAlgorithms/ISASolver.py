@@ -87,7 +87,8 @@ def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 							number_to_real_date_dict, hours_dict)
 	solver.check_solution_quality()
 
-	answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
+	# answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
+	answer = 'y'
 	if answer == 'y':
 		halls_data = pd.read_csv(ISA_CLASSROOMS_DATABASE)
 		halls = get_halls(halls_data)
@@ -104,18 +105,18 @@ def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 		update_course_hall_data(courses_to_rows_dict, complex_solver.get_best_child().halls_assignment_dict,
 								reverse_halls_to_col_dict)
 		complex_solver.check_hall_solution_quality()
-	# scopes = ["https://www.googleapis.com/auth/calendar"]
-	# flow = InstalledAppFlow.from_client_secrets_file("Utils/client_secret.json", scopes=scopes)
-	# credentials = flow.run_console()
-	# pickle.dump(credentials, open("Utils/token.pkl", "wb"))
-	# credentials = pickle.load(open("Utils/token.pkl", "rb"))
-	# service = build("calendar", "v3", credentials=credentials)
-	# result = service.calendarList().list().execute()
-	export_to_calendar(courses, answer)
-	# calendar_id = result["items"][0]['id']
-	# scopes = ["https://www.googleapis.com/auth/calendar"]
-	# flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=scopes)
-	# flow.run_console()
+	# # scopes = ["https://www.googleapis.com/auth/calendar"]
+	# # flow = InstalledAppFlow.from_client_secrets_file("Utils/client_secret.json", scopes=scopes)
+	# # credentials = flow.run_console()
+	# # pickle.dump(credentials, open("Utils/token.pkl", "wb"))
+	# # credentials = pickle.load(open("Utils/token.pkl", "rb"))
+	# # service = build("calendar", "v3", credentials=credentials)
+	# # result = service.calendarList().list().execute()
+	# export_to_calendar(courses, answer)
+	# # calendar_id = result["items"][0]['id']
+	# # scopes = ["https://www.googleapis.com/auth/calendar"]
+	# # flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=scopes)
+	# # flow.run_console()
 	if answer == 'y':
 		return solver, complex_solver
 	else:

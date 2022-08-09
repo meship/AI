@@ -6,7 +6,6 @@ class GeneticAlgorithmComplexGeneration:
     def __init__(self, n_courses, n_times, n_halls, course_to_row_dict, reverse_courses_dict,
                  halls_to_cols_dict, reverse_halls_to_col_dict, time_assignment_dict,
                  population_size):
-
         self.n_courses = n_courses
         self.n_times = n_times
         self.n_halls = n_halls
@@ -24,7 +23,7 @@ class GeneticAlgorithmComplexGeneration:
                                      halls_to_cols_dict, reverse_halls_to_col_dict, time_assignment_dict):
         population = list()
         for i in range(self.population_size_):
-            print(f"Creating child {i}")
+            # print(f"Creating child {i}")
             new_child = ISAHallState(n_courses, n_times, n_halls, course_to_row_dict, reverse_courses_dict,
                                      halls_to_cols_dict, reverse_halls_to_col_dict, time_assignment_dict,
                                      True)
@@ -42,12 +41,12 @@ class GeneticAlgorithmComplexGeneration:
         for i, element in enumerate(self.population_):
             probabilities[i] = -element.get_value()
         probabilities -= probabilities.min()
-        if sum(probabilities) == 0:
-            for course, halls in self.population_[0].halls_assignment_dict.items():
-                str = f"({self.time_assignment_dict[course]}) {self.reverse_courses_dict[course]}: "
-                for hall in halls:
-                    str += self.reverse_halls_to_col_dict[hall].get_name() + " "
-                print(str)
+        # if sum(probabilities) == 0:
+        #     for course, halls in self.population_[0].halls_assignment_dict.items():
+        #         str = f"({self.time_assignment_dict[course]}) {self.reverse_courses_dict[course]}: "
+        #         for hall in halls:
+        #             str += self.reverse_halls_to_col_dict[hall].get_name() + " "
+        #         # print(str) #todo a test that should be erased
         probabilities = probabilities / sum(probabilities)
         children_amount = 0
         while children_amount < self.population_size_:

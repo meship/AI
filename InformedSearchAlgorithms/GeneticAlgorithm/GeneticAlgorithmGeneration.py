@@ -22,7 +22,7 @@ class GeneticAlgorithmGeneration:
                                   times_to_dates_dict):
         population = list()
         for i in range(self.population_size_):
-            print(f"Creating child {i}")
+            # print(f"Creating child {i}")
             new_child = ISAState(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
                                  reverse_times_to_cols_dict, assignment_dict, None, times_to_dates_dict, True)
             for child in population:
@@ -36,8 +36,8 @@ class GeneticAlgorithmGeneration:
     def create_new_generation(self):
         new_population = list()
         probabilities = np.empty(self.population_size_)
-        print(f"Size is:{probabilities.shape}")
-        print(f"len is: {len(self.population_)}")
+        # print(f"Size is:{probabilities.shape}")
+        # print(f"len is: {len(self.population_)}")
         for i, element in enumerate(self.population_):
             probabilities[i] = -element.get_value() # [-10, -4 , -2] -> [0, 6, 8]
         probabilities -= probabilities.min()

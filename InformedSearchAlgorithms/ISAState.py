@@ -70,7 +70,7 @@ class ISAState:
 			student_count = 0
 			for course in self.reverse_assignment_dict[current_moed_a_time]:
 				student_count += self.reverse_course_dict[course].get_n_students()
-				if student_count > 540:  # max curse students
+				if student_count > MAX_STUDENTS_PER_TIME:  # max curse students
 					# todo: need to add another constaint - think more
 					return 0
 
@@ -80,7 +80,7 @@ class ISAState:
 			student_count = 0
 			for course in self.reverse_assignment_dict[current_moed_b_time]:
 				student_count += self.reverse_course_dict[course].get_n_students()
-				if student_count > 540:  # max curse students
+				if student_count > MAX_STUDENTS_PER_TIME:  # max curse students
 					return 0
 
 			# updating the dicts
@@ -232,7 +232,7 @@ class ISAState:
 		if exam_new_col in self.reverse_assignment_dict.keys():
 			for course_ind in self.reverse_assignment_dict[exam_new_col]:
 					student_count += self.reverse_course_dict[course_ind].get_n_students()
-					if student_count > 540:  # max curse students
+					if student_count > MAX_STUDENTS_PER_TIME:  # max curse students
 						return False
 		return True
 
@@ -256,7 +256,7 @@ class ISAState:
 		#             2 * self.exam_on_sunday_morning_constraint() + 4 * self.math_exam_on_morning_constraint() + \
 		#             7 * self.exam_on_evening_constraint()
 		state_val = self.exam_diff_constraint() + 0.75 * self.exam_on_evening_constraint()
-		print(state_val)
+		# print(state_val)
 		return state_val
 
 	def exam_diff_constraint(self):
@@ -323,10 +323,12 @@ class ISAState:
 		quality_dict = dict()
 		course_permutations = itertools.permutations(self.courses_dict.keys(), 2)
 		for course_pair in course_permutations:
-			actual_pair_diff = self.get_course_time_diff(course_pair)
-			diff = max(0, int(self.pairs_difference[course_pair] - actual_pair_diff))
-			if diff:
-				quality_dict[course_pair] = diff
+			if self.assignment_dict[self.courses_dict[course_pair[0]]] < \
+					self.assignment_dict[self.courses_dict[course_pair[1]]]:
+				actual_pair_diff = self.get_course_time_diff(course_pair)
+				diff = max(0, int(self.pairs_difference[course_pair] - actual_pair_diff))
+				if diff:
+					quality_dict[course_pair] = diff
 		return quality_dict
 
 	def get_course_time_diff(self, course_pair):
