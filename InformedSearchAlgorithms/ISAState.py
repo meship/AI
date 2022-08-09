@@ -132,7 +132,6 @@ class ISAState:
 	def generate_successor(self):
 		# todo: add another move option which chooses a random value to be assigned
 		successor_state = self.__copy__()
-		# Generate all legal moves
 		for course_ind in range(self.n_courses):
 			time_ind = successor_state.assignment_dict[course_ind]
 			action_to_apply = np.random.choice(a=[UNARY_PERIODS_MOVE, BINARY_MOVE, RANDOM_MOVE], size=1, replace=True,
@@ -256,7 +255,7 @@ class ISAState:
 		#             2 * self.exam_on_sunday_morning_constraint() + 4 * self.math_exam_on_morning_constraint() + \
 		#             7 * self.exam_on_evening_constraint()
 		state_val = self.exam_diff_constraint() + 0.75 * self.exam_on_evening_constraint()
-		# print(state_val)
+		print(state_val)
 		return state_val
 
 	def exam_diff_constraint(self):

@@ -81,6 +81,79 @@ def get_halls(given_data):
 	return halls
 
 
+def check_solution_quality(state, export_to_graph=False):
+	to_print = "Results: \n"
+	# to_print += f"Duplicate status: {self.best_child.check_duplicates()}")
+	to_print += f"Difference status: \n"
+	diff_results = state.check_exams_diff()
+	for pair, diff in diff_results.items():
+		to_print += f"({pair[0]}, {pair[1]}): {diff}\n"
+	to_print += f"Number of Friday exams: {state.exam_on_friday_constraint()}\n"
+	to_print += f"Number of Sunday morning exams: {state.exam_on_sunday_morning_constraint()}\n"
+	to_print += f"Number of evening exams: {state.exam_on_evening_constraint()}\n"
+	to_print += f"Number of Math NOT morning exams: {state.math_exam_on_morning_constraint()}\n"
+
+	if export_to_graph:
+		return diff_results, state.exam_on_evening_constraint()
+	else:
+		print(to_print)
+
+
+def check_halls_solution_quality(state, export_to_graph=False):
+	to_print = "Results: \n"
+	to_print += "Number of unfair assignments with different chair types: \n"
+	course_to_unfair_assignment = dict()
+	num_of_unfair_courses = 0
+	for course, halls in state.halls_assignment_dict.items():
+		r, s = 0, 0
+		for hall_ind in halls:
+			if state.reverse_halls_dict[hall_ind].get_chair_type() == "s":
+				s += 1
+			# s += self.best_child.reverse_halls_dict[hall_ind].get_capacity()
+			elif state.reverse_halls_dict[hall_ind].get_chair_type() == "r":
+				r += 1
+			# r += self.best_child.reverse_halls_dict[hall_ind].get_capacity()
+			else:
+				break
+		else:
+			unfair_assignment = min(r, s)
+			if unfair_assignment:
+				to_print += f"{state.reverse_courses_dict[course]}: student: {s}, regular: {r}\n"
+				course_to_unfair_assignment[state.reverse_courses_dict[course]] = (s, r)
+				num_of_unfair_courses += 1
+
+	total_halls_assigned = 0
+	student_chair_halls = 0
+	for course, halls in state.halls_assignment_dict.items():
+		total_halls_assigned += len(halls)
+		for hall_ind in halls:
+			# total_halls_assigned += self.best_child.reverse_halls_dict[hall_ind].get_capacity()
+			if state.reverse_halls_dict[hall_ind].get_chair_type() == "s":
+				student_chair_halls += 1
+			# student_chair_halls += self.best_child.reverse_halls_dict[hall_ind].get_capacity()
+	to_print += f"\nNumber of halls with student chairs assigned {student_chair_halls} out " \
+				f"of {total_halls_assigned} halls\n"
+	to_print += f"\nRatio number between halls capacity assigned and exam number of students: \n"
+
+	for course, halls, in state.halls_assignment_dict.items():
+		capacity = sum([state.reverse_halls_dict[hall].get_capacity() for hall in halls])
+		ratio = capacity / state.reverse_courses_dict[course].get_n_students()
+		if ratio > SQUEEZE_RATIO:
+			to_print += f"{state.reverse_courses_dict[course]}: {ratio}\n"
+	to_print += "\nAreas of each course assigned: \n"
+	course_to_areas_dict = dict()
+	for course, halls in state.halls_assignment_dict.items():
+		course_obj = state.reverse_courses_dict[course]
+		course_to_areas_dict[course_obj] = [state.reverse_halls_dict[hall].get_area() for hall in halls]
+		to_print += f"{course_obj}: {course_to_areas_dict[course_obj]}\n"
+
+	if export_to_graph:
+		return course_to_unfair_assignment, num_of_unfair_courses, student_chair_halls, total_halls_assigned, \
+			   course_to_areas_dict
+	else:
+		print(to_print)
+
+
 #######################################################################
 
 # General functions

@@ -11,7 +11,7 @@ import pickle
 from InformedSearchAlgorithms.SimulatedAnnealing.SimulatedAnnealingSolver import SimulatedAnnealingSolver
 import sys
 from InformedSearchAlgorithms.GeneticAlgorithm.GeneticAlgorithmSolver import *
-from Utils.utils import get_courses, make_domain, get_halls
+from Utils.utils import get_courses, make_domain, get_halls, check_solution_quality, check_halls_solution_quality
 
 
 def preprocess_courses(courses_list, times_list):
@@ -67,11 +67,28 @@ def solve_SA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 									  times_to_cols_dict, reverse_times_to_cols_dict, {},
 									  number_to_real_date_dict, ALPHA, cooling_function, SA_MAX_ITER, callback)
 	solver.solve()
-	print(solver.get_state())
+	# print(solver.get_state())
 	update_course_time_data(courses_to_rows_dict, solver.get_state().assignment_dict, reverse_times_to_cols_dict,
 							number_to_real_date_dict, hours_dict)
-	solver.check_solution_quality()
-	export_to_calendar(courses, "n")
+	check_solution_quality(solver.get_state())
+
+	answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
+	if answer == "y":
+		halls_data = pd.read_csv(ISA_CLASSROOMS_DATABASE)
+		halls = get_halls(halls_data)
+		n_halls, halls_to_cols_dict, reverse_halls_to_col_dict = preprocess_halls(halls)
+		complex_solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
+												  times_to_cols_dict, reverse_times_to_cols_dict, {},
+												  number_to_real_date_dict, ALPHA, cooling_function, SA_MAX_ITER,
+												  callback, complex_callback = None,  complex_problem=True,
+												n_halls=n_halls, halls_to_cols_dict=halls_to_cols_dict,
+												reverse_halls_to_cols_dict=reverse_halls_to_col_dict,
+												time_assignment_dict=solver.get_state().assignment_dict)
+		complex_solver.solve()
+		update_course_hall_data(courses_to_rows_dict, complex_solver.get_state().halls_assignment_dict,
+								reverse_halls_to_col_dict)
+		check_halls_solution_quality(complex_solver.get_state())
+	export_to_calendar(courses, answer)
 
 
 def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
@@ -82,10 +99,10 @@ def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 									times_to_cols_dict, reverse_times_to_cols_dict, number_to_real_date_dict,
 									POPULATION_SIZE, GENERATION_SIZE, callback)
 	solver.solve()
-	print(solver.get_best_child())
+	# print(solver.get_best_child())
 	update_course_time_data(courses_to_rows_dict, solver.get_best_child().assignment_dict, reverse_times_to_cols_dict,
 							number_to_real_date_dict, hours_dict)
-	solver.check_solution_quality()
+	check_solution_quality(solver.get_best_child())
 
 	# answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
 	answer = 'y'
@@ -104,7 +121,8 @@ def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 		complex_solver.solve()
 		update_course_hall_data(courses_to_rows_dict, complex_solver.get_best_child().halls_assignment_dict,
 								reverse_halls_to_col_dict)
-		complex_solver.check_hall_solution_quality()
+		check_solution_quality(complex_solver.get_best_child())
+
 	# # scopes = ["https://www.googleapis.com/auth/calendar"]
 	# # flow = InstalledAppFlow.from_client_secrets_file("Utils/client_secret.json", scopes=scopes)
 	# # credentials = flow.run_console()
@@ -121,6 +139,7 @@ def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 		return solver, complex_solver
 	else:
 		return solver, None
+
 
 if __name__ == '__main__':
 	# argv[0] = kind, argv[1 + 2] = '2022/01/15', '2022/03/08'

@@ -23,7 +23,6 @@ class ISAHallState:
             self.halls_assignment_dict = dict()  # mapping exam to class
             self.time_to_halls = dict()
             self.initialize_state()
-            a = 1
         else:
             self.halls_assignment_dict = halls_assignment_dict
             self.time_to_halls = time_to_halls_dict
@@ -70,6 +69,18 @@ class ISAHallState:
 
     def set_operation(self, base, list_to_remove, list_to_add):
         return list((set(base) - set(list_to_remove)).union(set(list_to_add)))
+
+    def generate_successor(self):
+        successor_state = self.__copy__()
+        # Generate a legal successor
+        for course_ind in range(self.n_courses):
+            time_ind = successor_state.time_assignment_dict[course_ind]
+            action_to_apply = np.random.choice([UNARY_HALL_MOVE,  BINARY_HALL_MOVE])
+            if action_to_apply == UNARY_HALL_MOVE:
+                successor_state.unary_move(course_ind, time_ind)
+            else:
+                successor_state.binary_move(course_ind, time_ind)
+        return successor_state
 
     def unary_move(self, course_ind, course_time):
         halls_len = len(self.halls_assignment_dict[course_ind])
@@ -164,7 +175,7 @@ class ISAHallState:
     def get_value(self):
         value_to_return = self.unfair_assignment() + self.squeeze() + self.uncomfortable_assignment() + \
                           1.5 * self.far_locations()
-        # print(value_to_return)
+        print(value_to_return)
         return value_to_return
 
     def unfair_assignment(self):
@@ -216,15 +227,18 @@ class ISAHallState:
 
     def __copy__(self):
         c_n_courses = self.n_courses
+        c_n_times = self.n_times
         c_n_halls = self.n_halls
         c_course_dict = self.courses_dict
         c_reverse_course_dict = self.reverse_courses_dict
         c_halls_dict = self.halls_dict
+        c_n_reverse_halls_dict = self.reverse_halls_dict
         c_time_assignment_dict = self.time_assignment_dict
-        c_halls_assignment_dict = copy.deepcopy(self.halls_assignment_dict)
+        c_halls_assignment_dict = self.halls_assignment_dict.copy()
         c_time_to_halls_dict = copy.deepcopy(self.time_to_halls)
-        return ISAHallState(c_n_courses, c_n_halls, c_course_dict, c_reverse_course_dict, c_halls_dict,
-                            c_time_assignment_dict, False, c_halls_assignment_dict, c_time_to_halls_dict)
+        return ISAHallState(c_n_courses, c_n_times, c_n_halls, c_course_dict, c_reverse_course_dict, c_halls_dict,
+                            c_n_reverse_halls_dict, c_time_assignment_dict, False, c_halls_assignment_dict,
+                            c_time_to_halls_dict)
 
     def __repr__(self):
         repr_val = "Exam Hall Scheduling Is:\n"
