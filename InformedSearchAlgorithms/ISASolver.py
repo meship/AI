@@ -1,13 +1,14 @@
 from datetime import datetime
 
 # from google_auth_oauthlib.flow import InstalledAppFlow
+# import json
+# from googleapiclient.discovery import build
+# import pickle
 
 from Utils.utils import export_to_calendar
 
 import pandas as pd
-import json
-from googleapiclient.discovery import build
-import pickle
+
 from InformedSearchAlgorithms.SimulatedAnnealing.SimulatedAnnealingSolver import SimulatedAnnealingSolver
 import sys
 from InformedSearchAlgorithms.GeneticAlgorithm.GeneticAlgorithmSolver import *
@@ -61,11 +62,12 @@ def update_course_hall_data(courses_dict, result_assignment_dict, reverse_halls_
 
 
 def solve_SA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
-			 reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, callback=None):
+			 reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, algorithm, callback=None):
 	print(SIMULATED_ANNEALING_MESSAGE)
 	solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
 									  times_to_cols_dict, reverse_times_to_cols_dict, {},
-									  number_to_real_date_dict, ALPHA, cooling_function, SA_MAX_ITER, callback)
+									  number_to_real_date_dict, ALPHA, cooling_function, algorithm, SA_MAX_ITER,
+									  callback)
 	solver.solve()
 	# print(solver.get_state())
 	update_course_time_data(courses_to_rows_dict, solver.get_state().assignment_dict, reverse_times_to_cols_dict,
@@ -79,11 +81,11 @@ def solve_SA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 		n_halls, halls_to_cols_dict, reverse_halls_to_col_dict = preprocess_halls(halls)
 		complex_solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
 												  times_to_cols_dict, reverse_times_to_cols_dict, {},
-												  number_to_real_date_dict, ALPHA, cooling_function, SA_MAX_ITER,
-												  callback, complex_callback = None,  complex_problem=True,
-												n_halls=n_halls, halls_to_cols_dict=halls_to_cols_dict,
-												reverse_halls_to_cols_dict=reverse_halls_to_col_dict,
-												time_assignment_dict=solver.get_state().assignment_dict)
+												  number_to_real_date_dict, ALPHA, cooling_function, algorithm,
+												  SA_MAX_ITER, callback, complex_callback=None, complex_problem=True,
+												  n_halls=n_halls, halls_to_cols_dict=halls_to_cols_dict,
+												  reverse_halls_to_cols_dict=reverse_halls_to_col_dict,
+												  time_assignment_dict=solver.get_state().assignment_dict)
 		complex_solver.solve()
 		update_course_hall_data(courses_to_rows_dict, complex_solver.get_state().halls_assignment_dict,
 								reverse_halls_to_col_dict)
@@ -104,8 +106,8 @@ def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 							number_to_real_date_dict, hours_dict)
 	check_solution_quality(solver.get_best_child())
 
-	# answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
-	answer = 'y'
+	answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
+	# answer = 'y'
 	if answer == 'y':
 		halls_data = pd.read_csv(ISA_CLASSROOMS_DATABASE)
 		halls = get_halls(halls_data)
@@ -121,20 +123,16 @@ def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 		complex_solver.solve()
 		update_course_hall_data(courses_to_rows_dict, complex_solver.get_best_child().halls_assignment_dict,
 								reverse_halls_to_col_dict)
-		check_solution_quality(complex_solver.get_best_child())
+		check_halls_solution_quality(complex_solver.get_best_child())
 
-	# # scopes = ["https://www.googleapis.com/auth/calendar"]
-	# # flow = InstalledAppFlow.from_client_secrets_file("Utils/client_secret.json", scopes=scopes)
-	# # credentials = flow.run_console()
-	# # pickle.dump(credentials, open("Utils/token.pkl", "wb"))
-	# # credentials = pickle.load(open("Utils/token.pkl", "rb"))
-	# # service = build("calendar", "v3", credentials=credentials)
-	# # result = service.calendarList().list().execute()
-	# export_to_calendar(courses, answer)
-	# # calendar_id = result["items"][0]['id']
-	# # scopes = ["https://www.googleapis.com/auth/calendar"]
-	# # flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=scopes)
-	# # flow.run_console()
+	# scopes = ["https://www.googleapis.com/auth/calendar"]
+	# flow = InstalledAppFlow.from_client_secrets_file("Utils/client_secret.json", scopes=scopes)
+	# credentials = flow.run_console()
+	# pickle.dump(credentials, open("Utils/token.pkl", "wb"))
+	# credentials = pickle.load(open("Utils/token.pkl", "rb"))
+	# service = build("calendar", "v3", credentials=credentials)
+	# result = service.calendarList().list().execute()
+	export_to_calendar(courses, answer)
 	if answer == 'y':
 		return solver, complex_solver
 	else:
@@ -149,21 +147,21 @@ if __name__ == '__main__':
 	n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict, reverse_times_to_cols_dict = \
 		preprocess_courses(courses, representative_times)
 	hours_dict = {MORNING_EXAM: (9, 0), NOON_EXAM: (13, 30), EVENING_EXAM: (17, 0)}
-	if sys.argv[1] == SIMULATED_ANNEALING:
+	if sys.argv[1] in [GRADIENT_DESCENT, SIMULATED_ANNEALING]:
 		solve_SA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
-				 reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses)
+				 reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, sys.argv[1])
 	else:
 		solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
 				 reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses)
 
-	# scopes = ["https://www.googleapis.com/auth/calendar"]
-	# flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=scopes)
-	# credentials = flow.run_console()
-	# pickle.dump(credentials, open("token.pkl", "wb"))
-	# credentials = pickle.load(open("token.pkl", "rb"))
-	# service = build("calendar", "v3", credentials=credentials)
-	# result = service.calendarList().list().execute()
-	# calendar_id = result["items"][0]['id']
-	# scopes = ["https://www.googleapis.com/auth/calendar"]
-	# flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=scopes)
-	# flow.run_console()
+# scopes = ["https://www.googleapis.com/auth/calendar"]
+# flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=scopes)
+# credentials = flow.run_console()
+# pickle.dump(credentials, open("token.pkl", "wb"))
+# credentials = pickle.load(open("token.pkl", "rb"))
+# service = build("calendar", "v3", credentials=credentials)
+# result = service.calendarList().list().execute()
+# calendar_id = result["items"][0]['id']
+# scopes = ["https://www.googleapis.com/auth/calendar"]
+# flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=scopes)
+# flow.run_console()

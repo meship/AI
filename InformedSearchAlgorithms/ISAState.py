@@ -20,7 +20,7 @@ class ISAState:
 		self.times_to_days_dict = times_to_dates_dict
 		if should_initialize:
 			# self.exam_time_mat = np.zeros(shape=(n_courses, n_times))
-			self.assignment_dict = dict() # mapping from courses indices to times indices
+			self.assignment_dict = dict()  # mapping from courses indices to times indices
 			self.reverse_assignment_dict = dict()
 			while self.initialize_state() == 0:
 				self.assignment_dict = dict()
@@ -129,21 +129,6 @@ class ISAState:
 		return int(moed_b_rep_time) - int(
 			moed_a_rep_time) >= ATTEMPTS_DIFF  # 12 instead of 14 due to 2 Saturdays between moed a and moed b
 
-	def generate_successor(self):
-		# todo: add another move option which chooses a random value to be assigned
-		successor_state = self.__copy__()
-		for course_ind in range(self.n_courses):
-			time_ind = successor_state.assignment_dict[course_ind]
-			action_to_apply = np.random.choice(a=[UNARY_PERIODS_MOVE, BINARY_MOVE, RANDOM_MOVE], size=1, replace=True,
-											   p=np.array([0.45, 0.45, 0.1]))
-			if action_to_apply == UNARY_PERIODS_MOVE:
-				successor_state.apply_unary_periods_move(course_ind, time_ind)
-			elif action_to_apply == BINARY_MOVE:
-				successor_state.apply_binary_move(course_ind, time_ind)
-			else:
-				successor_state.apply_random_move(course_ind, time_ind)
-		return successor_state
-
 	def apply_unary_periods_move(self, course_row, course_col):
 		progress_way = np.random.choice([UNARY_MOVE_FORWARD, UNARY_MOVE_BACKWARD])
 		for try_ind in range(1, N_TRIES + 1):
@@ -162,23 +147,6 @@ class ISAState:
 						  friend_row, self.assignment_dict[friend_row], BINARY_MOVE)
 		if self.check_binary_legal_move(move):
 			self.apply_move(move)
-
-	def apply_random_move(self, course_row, course_col):
-		moed_a_final_date = math.floor(self.n_times * MOED_A_RATIO)
-		if course_row < self.n_courses // 2:
-			for try_ind in range(1, N_TRIES + 1):
-				new_col = np.random.choice(a=np.array(np.arange(moed_a_final_date + 1)))
-				move = UnaryMove(course_row, course_col, course_row, new_col, UNARY_PERIODS_MOVE)
-				if self.check_unary_periods_legal_move(move):
-					self.apply_move(move)
-					return
-		else:
-			for try_ind in range(1, N_TRIES + 1):
-				new_col = np.random.choice(a=np.array(np.arange(moed_a_final_date + 1, self.n_times)))
-				move = UnaryMove(course_row, course_col, course_row, new_col, UNARY_PERIODS_MOVE)
-				if self.check_unary_periods_legal_move(move):
-					self.apply_move(move)
-					return
 
 	def check_unary_periods_legal_move(self, move):
 		# Check whether we are in the proper bounds
@@ -230,9 +198,11 @@ class ISAState:
 		student_count = 0
 		if exam_new_col in self.reverse_assignment_dict.keys():
 			for course_ind in self.reverse_assignment_dict[exam_new_col]:
-					student_count += self.reverse_course_dict[course_ind].get_n_students()
-					if student_count > MAX_STUDENTS_PER_TIME:  # max curse students
-						return False
+				student_count += self.reverse_course_dict[course_ind].get_n_students()
+				if student_count > MAX_STUDENTS_PER_TIME:  # max curse students
+					return False
+			if self.reverse_course_dict[exam_row].get_n_students() + student_count > MAX_STUDENTS_PER_TIME:
+				return False
 		return True
 
 	def apply_move(self, move):
@@ -255,7 +225,7 @@ class ISAState:
 		#             2 * self.exam_on_sunday_morning_constraint() + 4 * self.math_exam_on_morning_constraint() + \
 		#             7 * self.exam_on_evening_constraint()
 		state_val = self.exam_diff_constraint() + 0.75 * self.exam_on_evening_constraint()
-		print(state_val)
+		# print(state_val)
 		return state_val
 
 	def exam_diff_constraint(self):
@@ -264,7 +234,7 @@ class ISAState:
 		for course_pair in course_permutations:
 			actual_pair_diff = self.get_course_time_diff(course_pair)
 			diff_from_optimal = max(0, self.pairs_difference[course_pair] - actual_pair_diff)
-			if diff_from_optimal >= 3: #:PENALTY_RATIO * self.pairs_difference[course_pair]: # todo check
+			if diff_from_optimal >= 3:  #:PENALTY_RATIO * self.pairs_difference[course_pair]: # todo check
 				diff_from_optimal = diff_from_optimal * 2
 			state_value += diff_from_optimal
 		return state_value
@@ -350,7 +320,7 @@ class ISAState:
 		c_n_times_to_days_dict = self.times_to_days_dict
 		c_n_reverse_assignment_dict = copy.deepcopy(self.reverse_assignment_dict)
 		return ISAState(c_n_courses, c_n_times, c_courses_dict, c_reverse_course_dict, c_times_dict,
-						c_n_reverse_times_dict, c_assignment_dict,c_n_reverse_assignment_dict,c_n_times_to_days_dict,
+						c_n_reverse_times_dict, c_assignment_dict, c_n_reverse_assignment_dict, c_n_times_to_days_dict,
 						False)
 
 	def __repr__(self):
@@ -367,6 +337,71 @@ class ISAState:
 				eq_count += 1
 		return eq_count == self.n_courses
 
+	############################## specific for Gradient Descent ###########################################################
+	def generate_successor_for_gd(self):
+		win_state = None
+		for course_ind in range(self.n_courses):
+			successor_state = self.__copy__()
+			time_ind = successor_state.assignment_dict[course_ind]
+			successor_state = successor_state.apply_unary_periods_move_for_gd(course_ind, time_ind)
+			if win_state is None or successor_state.get_value() < win_state.get_value():
+				win_state = successor_state.__copy__()
+		return win_state
+
+	def apply_unary_periods_move_for_gd(self, course_row, course_col):
+		successor_state = self.__copy__()
+		win_state = self.__copy__()
+		for try_ind in range(1, self.n_times + 1):
+			move = UnaryMove(course_row, course_col, course_row, try_ind, UNARY_PERIODS_MOVE)
+			if self.check_unary_periods_legal_move(move):
+				successor_state.apply_move_for_gd(move)
+				if win_state is None or successor_state.get_value() < win_state.get_value():
+					win_state = successor_state.__copy__()
+				successor_state = self.__copy__()
+		return win_state
+
+	def apply_move_for_gd(self, move):
+		self.assignment_dict[move.new_row] = move.new_col
+		self.reverse_assignment_dict[move.old_col].remove(move.old_row)
+		update_dict(move.new_col, move.new_row, self.reverse_assignment_dict)
+
+	########################################################################################################################
+
+	############################## specific for our weird Algorithm ########################################################
+	def generate_successor(self):
+		# todo: add another move option which chooses a random value to be assigned
+		successor_state = self.__copy__()
+		for course_ind in range(self.n_courses):
+			time_ind = successor_state.assignment_dict[course_ind]
+			action_to_apply = np.random.choice(a=[UNARY_PERIODS_MOVE, BINARY_MOVE, RANDOM_MOVE], size=1, replace=True,
+											   p=np.array([0.45, 0.45, 0.1]))
+			if action_to_apply == UNARY_PERIODS_MOVE:
+				successor_state.apply_unary_periods_move(course_ind, time_ind)
+			elif action_to_apply == BINARY_MOVE:
+				successor_state.apply_binary_move(course_ind, time_ind)
+			else:
+				successor_state.apply_random_move(course_ind, time_ind)
+		return successor_state
+
+	def apply_random_move(self, course_row, course_col):
+		moed_a_final_date = math.floor(self.n_times * MOED_A_RATIO)
+		if course_row < self.n_courses // 2:
+			for try_ind in range(1, N_TRIES + 1):
+				new_col = np.random.choice(a=np.array(np.arange(moed_a_final_date + 1)))
+				move = UnaryMove(course_row, course_col, course_row, new_col, UNARY_PERIODS_MOVE)
+				if self.check_unary_periods_legal_move(move):
+					self.apply_move(move)
+					return
+		else:
+			for try_ind in range(1, N_TRIES + 1):
+				new_col = np.random.choice(a=np.array(np.arange(moed_a_final_date + 1, self.n_times)))
+				move = UnaryMove(course_row, course_col, course_row, new_col, UNARY_PERIODS_MOVE)
+				if self.check_unary_periods_legal_move(move):
+					self.apply_move(move)
+					return
+
+
+########################################################################################################################
 
 class UnaryMove:
 

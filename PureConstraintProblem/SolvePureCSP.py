@@ -37,8 +37,8 @@ if __name__ == '__main__':
     # argv[1] = kind, argv[2] = heuristic, argv[3 & 4] = '2022/01/15', '2022/03/08'
     domain, number_to_real_date_dict = make_domain(sys.argv[-2], sys.argv[-1])
     change_periods_date = int(MOED_A_RATIO * len(domain))
-    variables = make_variables(change_periods_date)
+    variables = make_variables(change_periods_date, 10)
     if sys.argv[1] == CHOICE_CSP:
-        solve_CSP(variables, domain, change_periods_date)
+        print(solve_CSP(variables, domain, change_periods_date))
     else:
         solve_WCSP(variables, domain, change_periods_date)

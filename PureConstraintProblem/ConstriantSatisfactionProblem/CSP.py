@@ -174,6 +174,7 @@ class CSP(ABC):
 
     def both_heuristics(self, assignment, shrank_domain):
         # assignment is complete if every variable is assigned (our base case)
+        # both least constraining value and degree heuristics
         if len(assignment) == len(self.variables_):
             return assignment
 

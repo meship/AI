@@ -164,7 +164,7 @@ def create_ga_graphs(course_num=None):
 	fig.show()
 
 
-def create_sa_graphs(course_num=None):
+def create_sa_graphs(algorithm, course_num=None):
 	if course_num:
 		courses_data = pd.read_csv(ISA_COURSE_DATABASE3).iloc[:course_num, :]
 	else:
@@ -181,7 +181,7 @@ def create_sa_graphs(course_num=None):
 		temp_list.append(temp)
 
 	solve_SA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
-			 reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, record_progress)
+			 reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, algorithm, record_progress)
 	fig = go.Figure(
 		data=[go.Scatter(x=np.arange(len(values_list)), y=values_list, mode='markers + lines')],
 		layout=go.Layout(title=f"SA Values as a Function of Iteration Number",
@@ -207,5 +207,5 @@ if __name__ == '__main__':
 		create_pure_constraint_problem_graphs(8, solve_WCSP, "WCSP")
 	elif sys.argv[1] == GENETIC_ALGORITHM:
 		create_ga_graphs()
-	elif sys.argv[1] == SIMULATED_ANNEALING:
-		create_sa_graphs()
+	elif sys.argv[1] in [SIMULATED_ANNEALING, GRADIENT_DESCENT]:
+		create_sa_graphs(sys.argv[1])

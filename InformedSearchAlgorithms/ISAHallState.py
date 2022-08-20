@@ -99,8 +99,6 @@ class ISAHallState:
                     continue
                 new_course_halls.append(available_hall_ind)
                 if self.is_sufficient_hall_addition(course_ind, new_course_halls, available_hall_ind):
-                    # if self.reverse_courses_dict[course_ind].get_number() == 67925:
-                    #     print(f"Unary move: NAND: {self.reverse_halls_dict[available_hall_ind]}")
                     legal_assignment = True
                     break
             if legal_assignment:
@@ -138,8 +136,6 @@ class ISAHallState:
             friend_new_indices = self.set_operation(self.halls_assignment_dict[friend_course], friend_indices_to_switch,
                                                     indices_to_switch)
             if self.check_legal_swap(course_ind, friend_course, my_new_indices, friend_new_indices):
-                # if self.reverse_courses_dict[course_ind].get_number() == 67925:
-                #     print(f"Binary move NAND: {[self.reverse_halls_dict[new_ind] for new_ind in my_new_indices]}")
                 self.apply_binary_action(course_ind, course_time, indices_to_switch, my_new_indices,
                                          friend_course, friend_indices_to_switch, friend_new_indices)
                 legal_swap = True

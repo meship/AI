@@ -26,7 +26,7 @@ MOED_B = 1
 ########### Pure Constraint Satisfaction Constants ##########
 #############################################################
 
-PURE_CONSTRAINT_COURSE_DATABASE = "Data/Courses_Data.csv"
+PURE_CONSTRAINT_COURSE_DATABASE = "../Data/Courses_Data.csv"
 PURE_CONSTRAINT_COURSE_DATABASE2 = "../Data/Courses_Data2.csv"
 COURSE_ATTRIBUTES = ['name', 'number', 'faculties', 'campus', 'students', 'hall type']
 CLASSROOMS_ATTRIBUTES = ['name', 'area', 'capacity', 'chair type', 'classroom type']
@@ -104,10 +104,10 @@ PSB_EXAM_DIFFERENCE_B = 3
 CSC_EXAM_DIFFERENCE_B = 3
 
 # Simulated Annealing
-ISA_COURSE_DATABASE = "Data/Courses_Data.csv"
-ISA_COURSE_DATABASE2 = "Data/Courses_Data2.csv"
-ISA_COURSE_DATABASE3 = "Data/Courses_Data3.csv"
-ISA_CLASSROOMS_DATABASE = "Data/Classrom_Data.csv"
+ISA_COURSE_DATABASE = "../Data/Courses_Data.csv"
+ISA_COURSE_DATABASE2 = "../Data/Courses_Data2.csv"
+ISA_COURSE_DATABASE3 = "Data/Courses_Data3.csv" #"../Data/Courses_Data3.csv"
+ISA_CLASSROOMS_DATABASE = "../Data/Classrom_Data.csv"
 UNARY_PERIODS_MOVE = 0
 UNARY_MOVE_FORWARD = 1
 UNARY_MOVE_BACKWARD = -1
@@ -133,9 +133,10 @@ MAX_STUDENTS_PER_TIME = 540
 # Run solvers
 SIMULATED_ANNEALING = "sa"
 GENETIC_ALGORITHM = "ga"
+GRADIENT_DESCENT = "gd"
 SIMULATED_ANNEALING_MESSAGE = "Chosen algorithm is Simulated Annealing"
 GENETIC_ALGORITHM_MESSAGE = "Chosen algorithm is Genetic Algorithm"
-SA_MAX_ITER = 5000
+SA_MAX_ITER = 100
 POPULATION_SIZE = 92
 POPULATION_SIZE_COMPLEX = 62
 GENERATION_SIZE = 300
