@@ -25,12 +25,12 @@ def hebrew_to_english_database(data_file):
 	english_keys_list = list(ATTRIBUTE_TO_QUESTION_DICT.keys())
 	english_keys_list.append('decision')
 	hebrew_to_english_keys = {df.keys()[i]: english_keys_list[i] for i in range(len(english_keys_list))}
-	df.rename(columns=hebrew_to_english_keys, inplace=True)
+	df = df.rename(columns=hebrew_to_english_keys)
 	df[english_keys_list[0]] = np.where(df[english_keys_list[0]] == "לא", "no", "yes")
 
 	df[english_keys_list[1]] = np.where(df[english_keys_list[1]] == "פחות מ 55", "54-", df[english_keys_list[1]])
 
-	df[english_keys_list[2]] = np.where(df[english_keys_list[2]] == "פחות מ 60", "59-", df[english_keys_list[1]])
+	df[english_keys_list[2]] = np.where(df[english_keys_list[2]] == "פחות מ 60", "59-", df[english_keys_list[2]])
 
 	df[english_keys_list[3]] = np.where(df[english_keys_list[3]] == "לא", "no", "yes")
 

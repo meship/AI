@@ -13,6 +13,7 @@ from InformedSearchAlgorithms.SimulatedAnnealing.SimulatedAnnealingSolver import
 import sys
 from InformedSearchAlgorithms.GeneticAlgorithm.GeneticAlgorithmSolver import *
 from Utils.utils import get_courses, make_domain, get_halls, check_solution_quality, check_halls_solution_quality
+from InformedSearchAlgorithms.RandomWalk.RandomWalkSolver import RandomWalkSolver
 
 
 def preprocess_courses(courses_list, times_list):
@@ -40,8 +41,12 @@ def preprocess_halls(halls):
 	return len(halls), halls_to_cols_dict, reverse_halls_to_col_dict
 
 
-def cooling_function(temp, alpha, t):
+def cooling_function_for_gd_sa(temp, alpha, t):
+	return temp / float(t + 1)
+
+def cooling_function_for_rw(temp, alpha, t):
 	return temp * (alpha ** t)
+
 
 
 def update_course_time_data(courses_dict, result_assignment_dict, reverse_time_dict, dates_dict, hours):
@@ -61,35 +66,41 @@ def update_course_hall_data(courses_dict, result_assignment_dict, reverse_halls_
 		course.set_halls(halls)
 
 
-def solve_SA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
-			 reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, algorithm, callback=None):
+def solve_SA_GD_RW(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
+				   reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, algorithm,
+				   algorithm_solver, max_iter, callback=None):
 	print(SIMULATED_ANNEALING_MESSAGE)
-	solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
+	if algorithm == RANDOM_WALK:
+		cooling_function = cooling_function_for_rw
+	else:
+		cooling_function = cooling_function_for_gd_sa
+	solver = algorithm_solver(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
 									  times_to_cols_dict, reverse_times_to_cols_dict, {},
-									  number_to_real_date_dict, ALPHA, cooling_function, algorithm, SA_MAX_ITER,
+									  number_to_real_date_dict, ALPHA, cooling_function, algorithm, max_iter,
 									  callback)
 	solver.solve()
 	# print(solver.get_state())
 	update_course_time_data(courses_to_rows_dict, solver.get_state().assignment_dict, reverse_times_to_cols_dict,
 							number_to_real_date_dict, hours_dict)
 	check_solution_quality(solver.get_state())
-
-	answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
-	if answer == "y":
-		halls_data = pd.read_csv(ISA_CLASSROOMS_DATABASE)
-		halls = get_halls(halls_data)
-		n_halls, halls_to_cols_dict, reverse_halls_to_col_dict = preprocess_halls(halls)
-		complex_solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
-												  times_to_cols_dict, reverse_times_to_cols_dict, {},
-												  number_to_real_date_dict, ALPHA, cooling_function, algorithm,
-												  SA_MAX_ITER, callback, complex_callback=None, complex_problem=True,
-												  n_halls=n_halls, halls_to_cols_dict=halls_to_cols_dict,
-												  reverse_halls_to_cols_dict=reverse_halls_to_col_dict,
-												  time_assignment_dict=solver.get_state().assignment_dict)
-		complex_solver.solve()
-		update_course_hall_data(courses_to_rows_dict, complex_solver.get_state().halls_assignment_dict,
-								reverse_halls_to_col_dict)
-		check_halls_solution_quality(complex_solver.get_state())
+	answer = "n"
+	if algorithm == GRADIENT_DESCENT:
+		answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
+		if answer == "y":
+			halls_data = pd.read_csv(ISA_CLASSROOMS_DATABASE)
+			halls = get_halls(halls_data)
+			n_halls, halls_to_cols_dict, reverse_halls_to_col_dict = preprocess_halls(halls)
+			complex_solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
+													  times_to_cols_dict, reverse_times_to_cols_dict, {},
+													  number_to_real_date_dict, ALPHA, cooling_function, algorithm,
+													  SA_MAX_ITER, callback, complex_callback=None, complex_problem=True,
+													  n_halls=n_halls, halls_to_cols_dict=halls_to_cols_dict,
+													  reverse_halls_to_cols_dict=reverse_halls_to_col_dict,
+													  time_assignment_dict=solver.get_state().assignment_dict)
+			complex_solver.solve()
+			update_course_hall_data(courses_to_rows_dict, complex_solver.get_state().halls_assignment_dict,
+									reverse_halls_to_col_dict)
+			check_halls_solution_quality(complex_solver.get_state())
 	export_to_calendar(courses, answer)
 
 
@@ -106,8 +117,8 @@ def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 							number_to_real_date_dict, hours_dict)
 	check_solution_quality(solver.get_best_child())
 
-	answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
-	# answer = 'y'
+	# answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
+	answer = 'y'
 	if answer == 'y':
 		halls_data = pd.read_csv(ISA_CLASSROOMS_DATABASE)
 		halls = get_halls(halls_data)
@@ -132,7 +143,7 @@ def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 	# credentials = pickle.load(open("Utils/token.pkl", "rb"))
 	# service = build("calendar", "v3", credentials=credentials)
 	# result = service.calendarList().list().execute()
-	export_to_calendar(courses, answer)
+	# export_to_calendar(courses, answer)
 	if answer == 'y':
 		return solver, complex_solver
 	else:
@@ -148,8 +159,13 @@ if __name__ == '__main__':
 		preprocess_courses(courses, representative_times)
 	hours_dict = {MORNING_EXAM: (9, 0), NOON_EXAM: (13, 30), EVENING_EXAM: (17, 0)}
 	if sys.argv[1] in [GRADIENT_DESCENT, SIMULATED_ANNEALING]:
-		solve_SA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
-				 reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, sys.argv[1])
+		solve_SA_GD_RW(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
+					   reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, sys.argv[1],
+					   SimulatedAnnealingSolver, SA_MAX_ITER)
+	elif sys.argv[1] == RANDOM_WALK:
+		solve_SA_GD_RW(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
+					   reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, sys.argv[1],
+					   RandomWalkSolver, RW_MAX_ITER)
 	else:
 		solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
 				 reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses)

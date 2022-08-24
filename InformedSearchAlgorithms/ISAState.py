@@ -352,6 +352,8 @@ class ISAState:
 		successor_state = self.__copy__()
 		win_state = self.__copy__()
 		for try_ind in range(1, self.n_times + 1):
+			if course_col == try_ind:
+				continue
 			move = UnaryMove(course_row, course_col, course_row, try_ind, UNARY_PERIODS_MOVE)
 			if self.check_unary_periods_legal_move(move):
 				successor_state.apply_move_for_gd(move)
