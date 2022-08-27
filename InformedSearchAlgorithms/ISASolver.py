@@ -1,19 +1,19 @@
 from datetime import datetime
 
-# from google_auth_oauthlib.flow import InstalledAppFlow
-# import json
-# from googleapiclient.discovery import build
-# import pickle
+from google_auth_oauthlib.flow import InstalledAppFlow
+import json
+from googleapiclient.discovery import build
+import pickle
 
 from Utils.utils import export_to_calendar
 
 import pandas as pd
 
-from InformedSearchAlgorithms.SimulatedAnnealing.SimulatedAnnealingSolver import SimulatedAnnealingSolver
+from InformedSearchAlgorithms.GradientDescent.GradientDescentSolver import GradientDescentSolver
 import sys
 from InformedSearchAlgorithms.GeneticAlgorithm.GeneticAlgorithmSolver import *
 from Utils.utils import get_courses, make_domain, get_halls, check_solution_quality, check_halls_solution_quality
-from InformedSearchAlgorithms.RandomWalk.RandomWalkSolver import RandomWalkSolver
+from InformedSearchAlgorithms.SimulatedAnnealing.SimulatedAnnealingSolver import SimulatedAnnealingSolver
 
 
 def preprocess_courses(courses_list, times_list):
@@ -46,6 +46,8 @@ def cooling_function_for_gd_sa(temp, alpha, t):
 
 def cooling_function_for_rw(temp, alpha, t):
 	return temp * (alpha ** t)
+	# return temp / float(alpha*temp + 1)
+	# return alpha * temp
 
 
 
@@ -66,11 +68,11 @@ def update_course_hall_data(courses_dict, result_assignment_dict, reverse_halls_
 		course.set_halls(halls)
 
 
-def solve_SA_GD_RW(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
-				   reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, algorithm,
-				   algorithm_solver, max_iter, callback=None):
-	print(SIMULATED_ANNEALING_MESSAGE)
-	if algorithm == RANDOM_WALK:
+def solve_SA_GD_RGD(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
+					reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, algorithm,
+					algorithm_solver, max_iter, callback=None, complex_callback=None):
+	print(ALGORITHM_TO_MESSAGE[algorithm])
+	if algorithm == SIMULATED_ANNEALING:
 		cooling_function = cooling_function_for_rw
 	else:
 		cooling_function = cooling_function_for_gd_sa
@@ -85,23 +87,37 @@ def solve_SA_GD_RW(n_courses, n_times, courses_to_rows_dict, reverse_courses_dic
 	check_solution_quality(solver.get_state())
 	answer = "n"
 	if algorithm == GRADIENT_DESCENT:
-		answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
+		# answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
+		answer = 'y'
 		if answer == "y":
 			halls_data = pd.read_csv(ISA_CLASSROOMS_DATABASE)
 			halls = get_halls(halls_data)
 			n_halls, halls_to_cols_dict, reverse_halls_to_col_dict = preprocess_halls(halls)
-			complex_solver = SimulatedAnnealingSolver(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
-													  times_to_cols_dict, reverse_times_to_cols_dict, {},
-													  number_to_real_date_dict, ALPHA, cooling_function, algorithm,
-													  SA_MAX_ITER, callback, complex_callback=None, complex_problem=True,
-													  n_halls=n_halls, halls_to_cols_dict=halls_to_cols_dict,
-													  reverse_halls_to_cols_dict=reverse_halls_to_col_dict,
-													  time_assignment_dict=solver.get_state().assignment_dict)
+			complex_solver = GradientDescentSolver(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict,
+												   times_to_cols_dict, reverse_times_to_cols_dict, {},
+												   number_to_real_date_dict, ALPHA, cooling_function, algorithm,
+												   GD_MAX_ITER_COMPLEX, complex_callback, complex_callback=None,
+												   complex_problem=True, n_halls=n_halls,
+												   halls_to_cols_dict=halls_to_cols_dict,
+												   reverse_halls_to_cols_dict=reverse_halls_to_col_dict,
+												   time_assignment_dict=solver.get_state().assignment_dict)
 			complex_solver.solve()
 			update_course_hall_data(courses_to_rows_dict, complex_solver.get_state().halls_assignment_dict,
 									reverse_halls_to_col_dict)
 			check_halls_solution_quality(complex_solver.get_state())
-	export_to_calendar(courses, answer)
+	# scopes = ["https://www.googleapis.com/auth/calendar"]
+	# flow = InstalledAppFlow.from_client_secrets_file("../Utils/client_secret.json", scopes=scopes)
+	# credentials = flow.run_console()
+	# pickle.dump(credentials, open("../Utils/token.pkl", "wb"))
+	# credentials = pickle.load(open("../Utils/token.pkl", "rb"))
+	# service = build("calendar", "v3", credentials=credentials)
+	# result = service.calendarList().list().execute()
+	# export_to_calendar(courses, answer)
+	if answer == 'y':
+		return solver, answer, complex_solver
+	else:
+		return solver, answer,  None
+
 
 
 def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
@@ -145,9 +161,9 @@ def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 	# result = service.calendarList().list().execute()
 	# export_to_calendar(courses, answer)
 	if answer == 'y':
-		return solver, complex_solver
+		return solver, answer, complex_solver
 	else:
-		return solver, None
+		return solver, answer,  None
 
 
 if __name__ == '__main__':
@@ -158,14 +174,14 @@ if __name__ == '__main__':
 	n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict, reverse_times_to_cols_dict = \
 		preprocess_courses(courses, representative_times)
 	hours_dict = {MORNING_EXAM: (9, 0), NOON_EXAM: (13, 30), EVENING_EXAM: (17, 0)}
-	if sys.argv[1] in [GRADIENT_DESCENT, SIMULATED_ANNEALING]:
-		solve_SA_GD_RW(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
-					   reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, sys.argv[1],
-					   SimulatedAnnealingSolver, SA_MAX_ITER)
-	elif sys.argv[1] == RANDOM_WALK:
-		solve_SA_GD_RW(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
-					   reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, sys.argv[1],
-					   RandomWalkSolver, RW_MAX_ITER)
+	if sys.argv[1] in [GRADIENT_DESCENT, RANDOM_GRADIENT_DESCENT]:
+		solve_SA_GD_RGD(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
+						reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, sys.argv[1],
+						GradientDescentSolver, GD_MAX_ITER)
+	elif sys.argv[1] == SIMULATED_ANNEALING:
+		solve_SA_GD_RGD(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
+						reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses, sys.argv[1],
+						SimulatedAnnealingSolver, SA_MAX_ITER)
 	else:
 		solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
 				 reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses)

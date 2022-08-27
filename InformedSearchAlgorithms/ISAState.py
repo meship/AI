@@ -20,11 +20,7 @@ class ISAState:
 		self.times_to_days_dict = times_to_dates_dict
 		if should_initialize:
 			# self.exam_time_mat = np.zeros(shape=(n_courses, n_times))
-			self.assignment_dict = dict()  # mapping from courses indices to times indices
-			self.reverse_assignment_dict = dict()
-			while self.initialize_state() == 0:
-				self.assignment_dict = dict()
-				self.reverse_assignment_dict = dict()
+			self.initialize()
 		else:
 			self.assignment_dict = assignment_dict  # mapping from courses indices to times indices
 			self.reverse_assignment_dict = reverse_assignment_dict
@@ -46,6 +42,13 @@ class ISAState:
 		self.pairs_difference = dict()
 		for pair in pairs_permutations:
 			self.calculate_days_(pair)
+
+	def initialize(self):
+		self.assignment_dict = dict()  # mapping from courses indices to times indices
+		self.reverse_assignment_dict = dict()
+		while self.initialize_state() == 0:
+			self.assignment_dict = dict()
+			self.reverse_assignment_dict = dict()
 
 	def initialize_state(self):
 		moed_a_final_date = math.floor(self.n_times * MOED_A_RATIO)
@@ -337,7 +340,7 @@ class ISAState:
 				eq_count += 1
 		return eq_count == self.n_courses
 
-	############################## specific for Gradient Descent ###########################################################
+	############################## specific for Gradient Descent #######################################################
 	def generate_successor_for_gd(self):
 		win_state = None
 		for course_ind in range(self.n_courses):
@@ -350,7 +353,7 @@ class ISAState:
 
 	def apply_unary_periods_move_for_gd(self, course_row, course_col):
 		successor_state = self.__copy__()
-		win_state = self.__copy__()
+		win_state = None
 		for try_ind in range(1, self.n_times + 1):
 			if course_col == try_ind:
 				continue
@@ -367,9 +370,9 @@ class ISAState:
 		self.reverse_assignment_dict[move.old_col].remove(move.old_row)
 		update_dict(move.new_col, move.new_row, self.reverse_assignment_dict)
 
-	########################################################################################################################
+	####################################################################################################################
 
-	############################## specific for our weird Algorithm ########################################################
+	############################## specific for Random Wallk ###########################################################
 	def generate_successor(self):
 		# todo: add another move option which chooses a random value to be assigned
 		successor_state = self.__copy__()

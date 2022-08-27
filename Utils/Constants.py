@@ -16,11 +16,9 @@ NOON_EXAM = 0.2
 MORNING_EXAM = 0.1
 MOED_A_RATIO = 0.6
 
-
 # Course
 MOED_A = 0
 MOED_B = 1
-
 
 #############################################################
 ########### Pure Constraint Satisfaction Constants ##########
@@ -64,7 +62,6 @@ EE_EXAM_DIFFERENCE = 6
 M_EXAM_DIFFERENCE = 7
 CB_EXAM_DIFFERENCE = 4
 
-
 #############################################################
 ################ Informned Search Algorithms ################
 #############################################################
@@ -75,17 +72,17 @@ CB_EXAM_DIFFERENCE = 4
 CS_EXAM_DIFFERENCE_A = 6
 EE_EXAM_DIFFERENCE_A = 5
 M_EXAM_DIFFERENCE_A = 7
-CB_EXAM_DIFFERENCE_A = 5 # 4
+CB_EXAM_DIFFERENCE_A = 5  # 4
 ST_EXAM_DIFFERENCE_A = 5
 E_EXAM_DIFFERENCE_A = 4
 P_EXAM_DIFFERENCE_A = 6
 PC_EXAM_DIFFERENCE_A = 5
 # Multi faculties symbols
-CSM_EXAM_DIFFERENCE_A = 4 # 3
-CSE_EXAM_DIFFERENCE_A = 4 # 3
-CSP_EXAM_DIFFERENCE_A = 4 # 3
+CSM_EXAM_DIFFERENCE_A = 4  # 3
+CSE_EXAM_DIFFERENCE_A = 4  # 3
+CSP_EXAM_DIFFERENCE_A = 4  # 3
 PSB_EXAM_DIFFERENCE_A = 3
-CSC_EXAM_DIFFERENCE_A = 4 # 3
+CSC_EXAM_DIFFERENCE_A = 4  # 3
 # Second attempts
 # Single faculties symbols
 CS_EXAM_DIFFERENCE_B = 4
@@ -103,11 +100,11 @@ CSP_EXAM_DIFFERENCE_B = 3
 PSB_EXAM_DIFFERENCE_B = 3
 CSC_EXAM_DIFFERENCE_B = 3
 
-# Simulated Annealing
+# SimulatedAnnealing
 ISA_COURSE_DATABASE = "../Data/Courses_Data.csv"
 ISA_COURSE_DATABASE2 = "../Data/Courses_Data2.csv"
-ISA_COURSE_DATABASE3 = "Data/Courses_Data3.csv" #"../Data/Courses_Data3.csv"
-ISA_CLASSROOMS_DATABASE = "Data/Classrom_Data.csv"
+ISA_COURSE_DATABASE3 = "../Data/Courses_Data3.csv"  # "../Data/Courses_Data3.csv"
+ISA_CLASSROOMS_DATABASE = "../Data/Classrom_Data.csv"
 UNARY_PERIODS_MOVE = 0
 UNARY_MOVE_FORWARD = 1
 UNARY_MOVE_BACKWARD = -1
@@ -127,22 +124,21 @@ PROB_DOMAIN = 100
 PENALTY_RATIO = 0.5
 MAX_STUDENTS_PER_TIME = 540
 
-
-
-
 # Run solvers
+RANDOM_GRADIENT_DESCENT = "rgd"
 SIMULATED_ANNEALING = "sa"
-RANDOM_WALK = "rw"
 GENETIC_ALGORITHM = "ga"
 GRADIENT_DESCENT = "gd"
-SIMULATED_ANNEALING_MESSAGE = "Chosen algorithm is Simulated Annealing"
+ALGORITHM_TO_MESSAGE = {"sa": "Chosen algorithm is SimulatedAnnealing", "gd": "Chosen algorithm is Gradient Descent",
+						"rgd": "Chosen algorithm is Random Gradient Descent"}
 GENETIC_ALGORITHM_MESSAGE = "Chosen algorithm is Genetic Algorithm"
-SA_MAX_ITER = 100
-RW_MAX_ITER = 5000
+GD_MAX_ITER = 100
+GD_MAX_ITER_COMPLEX = 150
+SA_MAX_ITER = 5000
 POPULATION_SIZE = 92
 POPULATION_SIZE_COMPLEX = 62
 GENERATION_SIZE = 300
-GENERATION_SIZE_COMPLEX = 300
+GENERATION_SIZE_COMPLEX = 350
 #############################################################
 ################ Extended problem ###########################
 #############################################################
@@ -159,4 +155,3 @@ SQUEEZE_RATIO = 1.25
 TIMEZONE = "Israel"
 DECISION_MESSAGE = "Do you want to save the calendar? Please insert y/n\n"
 DELETE_MESSAGE = "Deleting calendar"
-

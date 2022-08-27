@@ -2,6 +2,24 @@ import numpy as np
 import pandas as pd
 from termcolor import colored
 
+NO = 'n'
+
+YES = 'y'
+
+QUESTION_COLOR = 'blue'
+
+DATA_HEB_CSV = "exam_data_heb.csv"
+
+ANSWER_COLOR = 'cyan'
+
+NEGATIVE_ANSWER_MSG = "you shouldn't take the moed b exam"
+
+POSITIVE_ANSWER_MSG = "you should take the moed b exam"
+
+UNRECOGNIZED_ANSWER_MSG = "looks like you are the first one to face this condition \nwe'll be happy if you'll help us expand our " \
+		  "data and fill this form to let us know what you have chossen\n" \
+		  "https://docs.google.com/forms/d/e/1FAIpQLSfDaM7w2vvG9KHpyixrz2HfPhZx_0nO1T5RpRPNC-H2UQtFAg/viewform?usp=sf_link"
+
 eps = np.finfo(float).eps
 ATTRIBUTE_TO_QUESTION_DICT = {'did fail': "have you failed the exam? (yes, no)\n",
 							  'exam grade': "what is your exam grade? (54-, 55-69, 70-79, 80-89, 90-100)\n",
@@ -10,7 +28,7 @@ ATTRIBUTE_TO_QUESTION_DICT = {'did fail': "have you failed the exam? (yes, no)\n
 							  'improve moed b before': "have you improved your grade in moed b before? (yes, no)\n",
 							  'confident in improvement': "are you confident that you can improve the exam score?"
 														  "(yes, no, don't know)\n",
-							  'time to study': "how much time do you have to study (1,2,3,4,5,6,7+)\n",
+							  'time to study': "how much time do you have to study? (1,2,3,4,5,6,7+)\n",
 							  'exam difficulty': "what is the exam difficulty? (easy, medium, hard, very hard)\n",
 							  'exam type 1': "what is the type of the exam? (open, close, both)\n",
 							  'exam type 2': "how do you take the exam? (comp, write)\n",
@@ -124,33 +142,30 @@ def build_tree(df, tree=None):
 def tree_print(tree, add_str=""):
 	for key, value in tree.items():
 		print(f"{add_str} {key}")
-		if value in ['y', 'n']:
+		if value in [YES, NO]:
 			print(f"{add_str}\t->{value}")
 		else:
 			tree_print(value, add_str + "\t")
 
 
 def predict(tree):
-	if tree in ['y', 'n']:
+	if tree in [YES, NO]:
 		return tree
 	ind = list(tree.keys())[0]
-	ans = input(colored(ATTRIBUTE_TO_QUESTION_DICT[ind], 'blue', attrs=['bold']))
+	ans = input(colored(ATTRIBUTE_TO_QUESTION_DICT[ind], QUESTION_COLOR, attrs=['bold']))
 	if ans not in tree[ind].keys():
 		return -1
 	return predict(tree[ind][ans])
 
 
 if __name__ == "__main__":
-	df = hebrew_to_english_database("exam_data_heb.csv")
+	df = hebrew_to_english_database(DATA_HEB_CSV)
 	tree = build_tree(df)
-	tree_print(tree)
 	result = predict(tree)
 	if result == -1:
-		print("looks like you are the first one to face this condition \nwe'll be happy if you'll help us expand our "
-			  "data and fill this form to let us know what you have chossen\n"
-			  "https://docs.google.com/forms/d/e/1FAIpQLSfDaM7w2vvG9KHpyixrz2HfPhZx_0nO1T5RpRPNC-H2UQtFAg/viewform?usp=sf_link")
-	elif result == 'y':
-		print(colored("you should take the moed b exam", 'cyan'))
+		print(UNRECOGNIZED_ANSWER_MSG)
+	elif result == YES:
+		print(colored(POSITIVE_ANSWER_MSG, ANSWER_COLOR))
 
 	else:
-		print(colored("you shouldn't take the moed b exam", 'cyan'))
+		print(colored(NEGATIVE_ANSWER_MSG, ANSWER_COLOR))
