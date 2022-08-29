@@ -43,12 +43,23 @@ class ISAState:
 		for pair in pairs_permutations:
 			self.calculate_days_(pair)
 
+
+
+	def check_valid(self):
+		for time_ind in self.reverse_assignment_dict.keys():
+			if sum([self.reverse_course_dict[course_ind].get_n_students() for course_ind in
+					self.reverse_assignment_dict[time_ind]]) \
+					> MAX_STUDENTS_PER_TIME:
+				print("here unary")
+
 	def initialize(self):
 		self.assignment_dict = dict()  # mapping from courses indices to times indices
 		self.reverse_assignment_dict = dict()
-		while self.initialize_state() == 0:
+		result = self.initialize_state()
+		while result == 0:
 			self.assignment_dict = dict()
 			self.reverse_assignment_dict = dict()
+			result = self.initialize_state()
 
 	def initialize_state(self):
 		moed_a_final_date = math.floor(self.n_times * MOED_A_RATIO)
@@ -70,11 +81,13 @@ class ISAState:
 			current_moed_b_time = np.random.choice(available_moed_b_times)
 			self.assignment_dict[current_moed_a] = current_moed_a_time
 			update_dict(current_moed_a_time, current_moed_a, self.reverse_assignment_dict)
+			if len(self.reverse_assignment_dict[current_moed_a_time]) > 1:
+				k=9
+
 			student_count = 0
 			for course in self.reverse_assignment_dict[current_moed_a_time]:
 				student_count += self.reverse_course_dict[course].get_n_students()
 				if student_count > MAX_STUDENTS_PER_TIME:  # max curse students
-					# todo: need to add another constaint - think more
 					return 0
 
 			self.assignment_dict[current_moed_b] = current_moed_b_time
@@ -86,12 +99,15 @@ class ISAState:
 				if student_count > MAX_STUDENTS_PER_TIME:  # max curse students
 					return 0
 
+
+
 			# updating the dicts
 			moed_a_ind = np.argwhere(available_moed_a_courses == current_moed_a)
 			available_moed_a_courses = np.delete(available_moed_a_courses, moed_a_ind)
 			self.update_available_time(current_moed_a, current_moed_a_time, current_moed_b_time, moed_a_dict,
 									   moed_b_dict)
 			n_courses_assigned += 1
+
 
 		return 1
 

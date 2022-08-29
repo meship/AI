@@ -49,7 +49,6 @@ class SimulatedAnnealingSolver:
                 if val < np.exp(-delta / temperature):
                     self.state_ = next_state
                     print("here")
-                print("out")
             temperature = self.cooling_function_(self.initial_temperature_, self.alpha_, t)
 
 

@@ -76,8 +76,8 @@ class GeneticAlgorithmGeneration:
             for course_ind, course_time in assignment2.items():
                 update_dict(course_time, course_ind, reverse_assignment2)
 
-            valid_child_1 = self.check_valid_assignment(assignment1)
-            valid_child_2 = self.check_valid_assignment(assignment2)
+            valid_child_1 = self.check_valid_assignment(assignment1, reverse_assignment1)
+            valid_child_2 = self.check_valid_assignment(assignment2, reverse_assignment2)
             if valid_child_1 and valid_child_2:
                 state_child1 = ISAState(self.n_courses_, self.n_times_, self.course_to_rows_dict_,
                                         self.reverse_courses_dict_,self.times_to_cols_dict_,
@@ -99,7 +99,7 @@ class GeneticAlgorithmGeneration:
             else:
                 attempt += 1
 
-    def check_valid_assignment(self, assignment_to_check):
+    def check_valid_assignment(self, assignment_to_check, reverse_assignment_to_check):
         # Check whether there are no equal assignments
         # assignment_vals = assignment_to_check.values()
         # if len(assignment_vals) != len(np.unique(np.array(list(assignment_vals)))):
@@ -118,6 +118,12 @@ class GeneticAlgorithmGeneration:
         # Check whether all the difference between two attempts remains
         for course_ind in range(self.n_courses_ // 2):
             if assignment_to_check[course_ind + self.n_courses_ // 2] - assignment_to_check[course_ind] < ATTEMPTS_DIFF:
+                return False
+
+        for time_ind in reverse_assignment_to_check.keys():
+            if sum([self.reverse_courses_dict_[course_ind].get_n_students() for course_ind in
+                    reverse_assignment_to_check[time_ind]]) \
+                    > MAX_STUDENTS_PER_TIME:
                 return False
         return True
 

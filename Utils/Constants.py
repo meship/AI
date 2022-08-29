@@ -105,6 +105,7 @@ ISA_COURSE_DATABASE = "../Data/Courses_Data.csv"
 ISA_COURSE_DATABASE2 = "../Data/Courses_Data2.csv"
 ISA_COURSE_DATABASE3 = "../Data/Courses_Data3.csv"  # "../Data/Courses_Data3.csv"
 ISA_CLASSROOMS_DATABASE = "../Data/Classrom_Data.csv"
+GAME_THEORY_DATABASE = "../Data/GameTheoryData.csv"
 UNARY_PERIODS_MOVE = 0
 UNARY_MOVE_FORWARD = 1
 UNARY_MOVE_BACKWARD = -1

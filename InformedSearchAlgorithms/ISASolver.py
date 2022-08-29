@@ -159,7 +159,7 @@ def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 	# credentials = pickle.load(open("Utils/token.pkl", "rb"))
 	# service = build("calendar", "v3", credentials=credentials)
 	# result = service.calendarList().list().execute()
-	# export_to_calendar(courses, answer)
+	export_to_calendar(courses, answer)
 	if answer == 'y':
 		return solver, answer, complex_solver
 	else:
