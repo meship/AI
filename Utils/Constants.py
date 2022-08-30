@@ -24,12 +24,13 @@ MOED_B = 1
 ########### Pure Constraint Satisfaction Constants ##########
 #############################################################
 
-PURE_CONSTRAINT_COURSE_DATABASE = "../Data/Courses_Data.csv"
-PURE_CONSTRAINT_COURSE_DATABASE2 = "../Data/Courses_Data2.csv"
+PURE_CONSTRAINT_COURSE_DATABASE = "Data/Courses_Data.csv"
+PURE_CONSTRAINT_COURSE_DATABASE2 = "Data/Courses_Data2.csv"
 COURSE_ATTRIBUTES = ['name', 'number', 'faculties', 'campus', 'students', 'hall type']
 CLASSROOMS_ATTRIBUTES = ['name', 'area', 'capacity', 'chair type', 'classroom type']
 CHOICE_CSP = 'csp'
 CHOICE_WCSP = 'wcsp'
+CSP_NUMBER_OF_COURSES = 10
 BACKTRACKING = 'backtracking'
 MINIMUM_REMAINING_VARS = 'mrv'
 DEGREE = 'd'
@@ -101,11 +102,11 @@ PSB_EXAM_DIFFERENCE_B = 3
 CSC_EXAM_DIFFERENCE_B = 3
 
 # SimulatedAnnealing
-ISA_COURSE_DATABASE = "../Data/Courses_Data.csv"
-ISA_COURSE_DATABASE2 = "../Data/Courses_Data2.csv"
-ISA_COURSE_DATABASE3 = "../Data/Courses_Data3.csv"  # "../Data/Courses_Data3.csv"
-ISA_CLASSROOMS_DATABASE = "../Data/Classrom_Data.csv"
-GAME_THEORY_DATABASE = "../Data/GameTheoryData.csv"
+ISA_COURSE_DATABASE = "Data/Courses_Data.csv"
+ISA_COURSE_DATABASE2 = "Data/Courses_Data2.csv"
+ISA_COURSE_DATABASE3 = "Data/Courses_Data3.csv"  # "../Data/Courses_Data3.csv"
+ISA_CLASSROOMS_DATABASE = "Data/Classrom_Data.csv"
+GAME_THEORY_DATABASE = "Data/GameTheoryData.csv"
 UNARY_PERIODS_MOVE = 0
 UNARY_MOVE_FORWARD = 1
 UNARY_MOVE_BACKWARD = -1

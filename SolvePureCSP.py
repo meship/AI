@@ -5,6 +5,8 @@ import sys
 from Utils.utils import make_domain, make_variables
 
 
+
+
 def solve_CSP(variables, domain, change_periods_date):
     variables.sort(key=lambda x: x.get_attempt())
     CSP_Exam = CSPExams(variables, domain, change_periods_date)
@@ -37,8 +39,8 @@ if __name__ == '__main__':
     # argv[1] = kind, argv[2] = heuristic, argv[3 & 4] = '2022/01/15', '2022/03/08'
     domain, number_to_real_date_dict = make_domain(sys.argv[-2], sys.argv[-1])
     change_periods_date = int(MOED_A_RATIO * len(domain))
-    variables = make_variables(change_periods_date, 10)
+    variables = make_variables(change_periods_date, CSP_NUMBER_OF_COURSES)
     if sys.argv[1] == CHOICE_CSP:
         print(solve_CSP(variables, domain, change_periods_date))
     else:
-        solve_WCSP(variables, domain, change_periods_date)
+        print(solve_WCSP(variables, domain, change_periods_date))

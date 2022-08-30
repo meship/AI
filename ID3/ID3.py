@@ -7,8 +7,7 @@ NO = 'n'
 YES = 'y'
 
 QUESTION_COLOR = 'blue'
-
-DATA_HEB_CSV = "exam_data_heb.csv"
+DATA_HEB_CSV = "ID3/exam_data_heb.csv"
 
 ANSWER_COLOR = 'cyan'
 

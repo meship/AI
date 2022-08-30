@@ -14,7 +14,7 @@ import numpy as np
 
 
 def export_to_calendar(courses_list, complex):
-	credentials = pickle.load(open("../Utils/token.pkl", "rb"))
+	credentials = pickle.load(open("Utils/token.pkl", "rb"))
 	service = build("calendar", "v3", credentials=credentials)
 	result = service.calendarList().list().execute()
 	calendar_id = result["items"][0]['id']

@@ -1,9 +1,6 @@
 from datetime import datetime
 
-from google_auth_oauthlib.flow import InstalledAppFlow
-import json
-from googleapiclient.discovery import build
-import pickle
+
 
 from Utils.utils import export_to_calendar
 
@@ -87,8 +84,7 @@ def solve_SA_GD_RGD(n_courses, n_times, courses_to_rows_dict, reverse_courses_di
 	check_solution_quality(solver.get_state())
 	answer = "n"
 	if algorithm == GRADIENT_DESCENT:
-		# answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
-		answer = 'y'
+		answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
 		if answer == "y":
 			halls_data = pd.read_csv(ISA_CLASSROOMS_DATABASE)
 			halls = get_halls(halls_data)
@@ -106,13 +102,13 @@ def solve_SA_GD_RGD(n_courses, n_times, courses_to_rows_dict, reverse_courses_di
 									reverse_halls_to_col_dict)
 			check_halls_solution_quality(complex_solver.get_state())
 	# scopes = ["https://www.googleapis.com/auth/calendar"]
-	# flow = InstalledAppFlow.from_client_secrets_file("../Utils/client_secret.json", scopes=scopes)
+	# flow = InstalledAppFlow.from_client_secrets_file("Utils/client_secret.json", scopes=scopes)
 	# credentials = flow.run_console()
-	# pickle.dump(credentials, open("../Utils/token.pkl", "wb"))
-	# credentials = pickle.load(open("../Utils/token.pkl", "rb"))
+	# pickle.dump(credentials, open("Utils/token.pkl", "wb"))
+	# credentials = pickle.load(open("Utils/token.pkl", "rb"))
 	# service = build("calendar", "v3", credentials=credentials)
 	# result = service.calendarList().list().execute()
-	# export_to_calendar(courses, answer)
+	export_to_calendar(courses, answer)
 	if answer == 'y':
 		return solver, answer, complex_solver
 	else:
@@ -133,8 +129,7 @@ def solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, tim
 							number_to_real_date_dict, hours_dict)
 	check_solution_quality(solver.get_best_child())
 
-	# answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
-	answer = 'y'
+	answer = input(CONTINUE_TO_COMPLEX_MESSAGE)
 	if answer == 'y':
 		halls_data = pd.read_csv(ISA_CLASSROOMS_DATABASE)
 		halls = get_halls(halls_data)
@@ -185,15 +180,3 @@ if __name__ == '__main__':
 	else:
 		solve_GA(n_courses, n_times, courses_to_rows_dict, reverse_courses_dict, times_to_cols_dict,
 				 reverse_times_to_cols_dict, number_to_real_date_dict, hours_dict, courses)
-
-# scopes = ["https://www.googleapis.com/auth/calendar"]
-# flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=scopes)
-# credentials = flow.run_console()
-# pickle.dump(credentials, open("token.pkl", "wb"))
-# credentials = pickle.load(open("token.pkl", "rb"))
-# service = build("calendar", "v3", credentials=credentials)
-# result = service.calendarList().list().execute()
-# calendar_id = result["items"][0]['id']
-# scopes = ["https://www.googleapis.com/auth/calendar"]
-# flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=scopes)
-# flow.run_console()

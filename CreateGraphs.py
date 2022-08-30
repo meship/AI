@@ -1,7 +1,5 @@
-from plotly.subplots import make_subplots
-
-from PureConstraintProblem.SolvePureCSP import *
-from InformedSearchAlgorithms.ISASolver import *
+from SolvePureCSP import *
+from ISASolver import *
 # from InformedSearchAlgorithms.SimulatedAnnealing.SimulatedAnnealing import SimulatedAnnealing
 import time
 import plotly.graph_objects as go
